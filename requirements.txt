@@ -1,8 +1,8 @@
 Flask==2.3.2
 gunicorn==20.1.0
-dspy==2.5.7  # Replace with the actual version
 plotly==5.14.1
 pandas==1.5.3
 requests==2.31.0
 boto3==1.26.97
 Pillow==10.0.1
+Werkzeug==2.3.4
