@@ -5,7 +5,6 @@ import dspy
 import logging
 import os
 import uuid
-from PIL import Image
 from io import BytesIO
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
@@ -35,9 +34,9 @@ s3_client = boto3.client(
 
 def upload_image_to_s3(image, filename):
     try:
-        # Convert image to bytes
+        # Convert Plotly figure to image bytes
         img_byte_arr = BytesIO()
-        image.save(img_byte_arr, format='PNG')
+        image.write_image(img_byte_arr, format='PNG')
         img_byte_arr.seek(0)
 
         # Upload to S3
@@ -95,17 +94,14 @@ def analyze():
             logger.error(f"CodeFix Agent failed: {ex}")
             return jsonify({"error": "Failed to generate visualization."}), 500
 
-    # Step 3: Execute the generated code and capture output (e.g., Plotly image)
+    # Step 3: Execute the generated code and capture output (Plotly image)
     try:
-        # Execute the code safely and save the image
+        # Execute the code safely
         exec_globals = {}
         exec(code, exec_globals)
         plotly_fig = exec_globals.get("fig", None)
         if plotly_fig:
             unique_filename = f"{uuid.uuid4()}.png"
-            image_path = f"images/{unique_filename}"
-            plotly_fig.write_image(image_path)
-            # Upload to S3
             image_url = upload_image_to_s3(plotly_fig, unique_filename)
         else:
             image_url = ""
@@ -122,4 +118,4 @@ def analyze():
     return jsonify(response), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5001, debug=True)
