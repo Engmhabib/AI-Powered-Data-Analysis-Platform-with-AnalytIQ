@@ -1,14 +1,14 @@
-<!-- templates/story.html -->
+<!-- templates/analysis.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your Story - Auto-Analyst</title>
+    <title>Analysis Results - Auto-Analyst</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <header>
-        <h1>Your Generated Story</h1>
+        <h1>Analysis Results</h1>
     </header>
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -20,8 +20,8 @@
         {% endwith %}
         
         <div>
-            <h2>Story</h2>
-            <p>{{ story }}</p>
+            <h2>Commentary</h2>
+            <p>{{ commentary }}</p>
         </div>
         
         <div>
@@ -33,7 +33,16 @@
             {% endif %}
         </div>
         
-        <a href="{{ url_for('index') }}">Generate Another Story</a>
+        <div>
+            <h2>Analysis Details</h2>
+            {% if analysis %}
+                <pre>{{ analysis | tojson(indent=4) }}</pre>
+            {% else %}
+                <p>No analysis details available.</p>
+            {% endif %}
+        </div>
+        
+        <a href="{{ url_for('index') }}">Analyze Another Dataset</a>
     </div>
 </body>
 </html>
