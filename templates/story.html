@@ -1,0 +1,39 @@
+<!-- templates/story.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Story - Auto-Analyst</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Your Generated Story</h1>
+    </header>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        <div>
+            <h2>Story</h2>
+            <p>{{ story }}</p>
+        </div>
+        
+        <div>
+            <h2>Visualization</h2>
+            {% if image_url %}
+                <img src="{{ image_url }}" alt="Visualization">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No Visualization Available">
+            {% endif %}
+        </div>
+        
+        <a href="{{ url_for('index') }}">Generate Another Story</a>
+    </div>
+</body>
+</html>
