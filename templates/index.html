@@ -1,0 +1,39 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auto-Analyst</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Auto-Analyst: Your AI Data Analytics System</h1>
+    </header>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <label for="child_name">Child's Name:</label>
+            <input type="text" id="child_name" name="child_name" placeholder="Enter child's name" required>
+            
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" min="1" placeholder="Enter age" required>
+            
+            <label for="themes">Themes:</label>
+            <input type="text" id="themes" name="themes" placeholder="e.g., flowers, adventure" required>
+            
+            <label for="additional_details">Additional Details:</label>
+            <textarea id="additional_details" name="additional_details" rows="4" placeholder="Any additional instructions..."></textarea>
+            
+            <button type="submit">Generate Story</button>
+        </form>
+    </div>
+</body>
+</html>
