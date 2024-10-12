@@ -1,7 +1,7 @@
 # server.py
+
 from flask import Flask, request, jsonify
-from agents import DataVizAgent, CodeFixAgent, PlannerAgent
-import dspy
+from agents import DataProcessingAgent, AnalysisAgent, VisualizationAgent
 import logging
 import os
 import uuid
@@ -17,9 +17,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize agents
-data_viz_agent = dspy.ChainOfThought(DataVizAgent)
-code_fix_agent = dspy.ChainOfThought(CodeFixAgent)
-planner_agent = dspy.ChainOfThought(PlannerAgent)
+data_processing_agent = DataProcessingAgent()
+analysis_agent = AnalysisAgent()
+visualization_agent = VisualizationAgent()
 
 # Initialize AWS S3 client
 s3_bucket = os.environ.get('AWS_S3_BUCKET_NAME')
@@ -60,45 +60,38 @@ def upload_image_to_s3(image, filename):
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
     data = request.get_json()
-    query = data.get("query", "")
-    dataset = data.get("data", {})
-    styling_index = data.get("styling_index", "Default styling.")
+    dataset = data.get("dataset", "")
+    analysis_params = data.get("analysis_params", {})
+    styling_params = data.get("styling_params", "Default styling.")
 
-    if not query:
-        return jsonify({"error": "No query provided."}), 400
+    if not dataset:
+        return jsonify({"error": "No dataset provided."}), 400
 
-    # Step 1: Planner Agent routes the query
+    # Step 1: Data Processing
     try:
-        planner_result = planner_agent(query=query)
-        routed_agents = planner_result.get("routed_agents", ["DataVizAgent"])
+        processed_data = data_processing_agent.process(dataset)
     except Exception as e:
-        logger.error(f"Planner Agent failed: {e}")
-        return jsonify({"error": "Failed to route the query."}), 500
+        logger.error(f"DataProcessingAgent failed: {e}")
+        return jsonify({"error": "Data processing failed."}), 500
 
-    # Step 2: Data Visualization Agent generates code
+    # Step 2: Data Analysis
     try:
-        viz_result = data_viz_agent(goal=query, dataset=dataset, styling_index=styling_index)
-        code = viz_result.get("code", "")
-        commentary = viz_result.get("commentary", "")
+        analysis_results = analysis_agent.analyze(processed_data, analysis_params)
     except Exception as e:
-        logger.error(f"DataViz Agent failed: {e}")
-        # Attempt to fix code using CodeFixAgent
-        try:
-            fix_result = code_fix_agent(faulty_code=code, error="Code generation error.")
-            fixed_code = fix_result.get("fixed_code", "")
-            # Retry DataVizAgent with fixed code
-            viz_result = data_viz_agent(goal=query, dataset=dataset, styling_index=styling_index)
-            code = viz_result.get("code", "")
-            commentary = viz_result.get("commentary", "")
-        except Exception as ex:
-            logger.error(f"CodeFix Agent failed: {ex}")
-            return jsonify({"error": "Failed to generate visualization."}), 500
+        logger.error(f"AnalysisAgent failed: {e}")
+        return jsonify({"error": "Data analysis failed."}), 500
 
-    # Step 3: Execute the generated code and capture output (Plotly image)
+    # Step 3: Data Visualization
     try:
-        # Execute the code safely
+        visualization_code, commentary = visualization_agent.visualize(processed_data, analysis_results, styling_params)
+    except Exception as e:
+        logger.error(f"VisualizationAgent failed: {e}")
+        return jsonify({"error": "Data visualization failed."}), 500
+
+    # Step 4: Execute Visualization Code and Upload Image
+    try:
         exec_globals = {}
-        exec(code, exec_globals)
+        exec(visualization_code, exec_globals)
         plotly_fig = exec_globals.get("fig", None)
         if plotly_fig:
             unique_filename = f"{uuid.uuid4()}.png"
@@ -111,7 +104,8 @@ def analyze():
 
     # Prepare response
     response = {
-        "story": commentary,
+        "analysis": analysis_results,
+        "commentary": commentary,
         "image_url": image_url if image_url else f"https://{s3_bucket}.s3.amazonaws.com/placeholder.png"
     }
 
