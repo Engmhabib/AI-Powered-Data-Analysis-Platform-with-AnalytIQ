@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 import logging
 import requests
-import json
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management and flash messages
@@ -36,8 +35,8 @@ def index():
 
         try:
             # Send request to backend server
-            response = requests.post("https://your-heroku-app.herokuapp.com/api/analyze",
-                                     json=data)
+            backend_url = os.environ.get('BACKEND_URL', 'http://localhost:5001/api/analyze')
+            response = requests.post(backend_url, json=data)
             if response.status_code == 200:
                 result = response.json()
                 story = result.get("story", "No story generated.")
@@ -54,12 +53,6 @@ def index():
 
     return render_template('index.html')
 
-# Status Route (Optional for tracking job status)
-@app.route('/status/<job_id>')
-def status(job_id):
-    # Implement job status tracking if necessary
-    return render_template('status.html', job_id=job_id)
-
 # Error Handlers
 @app.errorhandler(404)
 def page_not_found(e):
@@ -74,4 +67,4 @@ def internal_error(e):
     return render_template('index.html'), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True)
