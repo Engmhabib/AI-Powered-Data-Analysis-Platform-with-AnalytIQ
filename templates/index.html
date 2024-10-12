@@ -3,12 +3,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Auto-Analyst</title>
+    <title>Auto-Analyst - Data Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <header>
-        <h1>Auto-Analyst: Your AI Data Analytics System</h1>
+        <h1>Auto-Analyst: Data Analysis Agent</h1>
     </header>
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -19,20 +19,26 @@
           {% endif %}
         {% endwith %}
         
-        <form method="POST">
-            <label for="child_name">Child's Name:</label>
-            <input type="text" id="child_name" name="child_name" placeholder="Enter child's name" required>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="dataset">Upload Dataset (CSV):</label>
+            <input type="file" id="dataset" name="dataset" accept=".csv" required>
             
-            <label for="age">Age:</label>
-            <input type="number" id="age" name="age" min="1" placeholder="Enter age" required>
+            <label for="descriptive_statistics">
+                <input type="checkbox" id="descriptive_statistics" name="descriptive_statistics">
+                Descriptive Statistics
+            </label>
             
-            <label for="themes">Themes:</label>
-            <input type="text" id="themes" name="themes" placeholder="e.g., flowers, adventure" required>
+            <label for="correlation_matrix">
+                <input type="checkbox" id="correlation_matrix" name="correlation_matrix">
+                Correlation Matrix
+            </label>
             
-            <label for="additional_details">Additional Details:</label>
-            <textarea id="additional_details" name="additional_details" rows="4" placeholder="Any additional instructions..."></textarea>
+            <!-- Add more analysis parameters as needed -->
             
-            <button type="submit">Generate Story</button>
+            <label for="styling_params">Styling Instructions:</label>
+            <textarea id="styling_params" name="styling_params" rows="4" placeholder="e.g., Use vibrant colors, set title font size to 20px"></textarea>
+            
+            <button type="submit">Analyze Data</button>
         </form>
     </div>
 </body>
