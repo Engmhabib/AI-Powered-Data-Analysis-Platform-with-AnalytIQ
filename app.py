@@ -1,8 +1,10 @@
 # app.py
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 import logging
 import requests
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management and flash messages
@@ -11,46 +13,80 @@ app.secret_key = os.urandom(24)  # For session management and flash messages
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Configure upload folder and allowed extensions
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'csv'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # Home Route
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Get form data
-        child_name = request.form.get('child_name')
-        age = request.form.get('age')
-        themes = request.form.get('themes')
-        additional_details = request.form.get('additional_details')
-
-        # Input validation
-        if not child_name or not age or not themes:
-            flash('Please fill out all required fields.', 'warning')
-            return render_template('index.html')
-
-        # Prepare data to send to backend
-        data = {
-            "query": f"Generate a story for {child_name}, age {age}, themes: {themes}. {additional_details}",
-            "data": {},  # Add dataset info if necessary
-            "styling_index": "Default styling."  # Add styling instructions if necessary
-        }
-
-        try:
-            # Send request to backend server
-            backend_url = os.environ.get('BACKEND_URL', 'http://localhost:5001/api/analyze')
-            response = requests.post(backend_url, json=data)
-            if response.status_code == 200:
-                result = response.json()
-                story = result.get("story", "No story generated.")
-                image_url = result.get("image_url", url_for('static', filename='images/placeholder.png'))
-                return render_template('story.html', story=story, image_url=image_url)
-            else:
-                flash('An error occurred while processing your request.', 'danger')
-                logger.error(f"Backend Error: {response.text}")
-                return render_template('index.html')
-        except Exception as e:
-            flash('Failed to connect to the backend server.', 'danger')
-            logger.error(f"Connection Error: {e}")
-            return render_template('index.html')
-
+        # Check if the post request has the file part
+        if 'dataset' not in request.files:
+            flash('No file part in the form.', 'danger')
+            return redirect(request.url)
+        
+        file = request.files['dataset']
+        
+        # If user does not select file, browser may submit an empty part
+        if file.filename == '':
+            flash('No selected file.', 'danger')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            dataset_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(dataset_path)
+            logger.info(f"Dataset uploaded: {dataset_path}")
+            
+            # Get analysis parameters from the form
+            analysis_params = {
+                "descriptive_statistics": 'descriptive_statistics' in request.form,
+                "correlation_matrix": 'correlation_matrix' in request.form
+                # Add more parameters as needed
+            }
+            
+            # Get styling parameters
+            styling_params = request.form.get('styling_params', 'Default styling.')
+            
+            # Prepare data to send to backend
+            data = {
+                "dataset": dataset_path,
+                "analysis_params": analysis_params,
+                "styling_params": styling_params
+            }
+            
+            try:
+                # Send request to backend server
+                backend_url = os.environ.get('BACKEND_URL', 'http://localhost:5001/api/analyze')
+                response = requests.post(backend_url, json=data)
+                if response.status_code == 200:
+                    result = response.json()
+                    analysis = result.get("analysis", {})
+                    commentary = result.get("commentary", "")
+                    image_url = result.get("image_url", url_for('static', filename='images/placeholder.png'))
+                    return render_template('analysis.html', analysis=analysis, commentary=commentary, image_url=image_url)
+                else:
+                    flash('An error occurred while processing your request.', 'danger')
+                    logger.error(f"Backend Error: {response.text}")
+                    return redirect(request.url)
+            except Exception as e:
+                flash('Failed to connect to the backend server.', 'danger')
+                logger.error(f"Connection Error: {e}")
+                return redirect(request.url)
+        
+        else:
+            flash('Allowed file types are CSV.', 'warning')
+            return redirect(request.url)
+    
     return render_template('index.html')
 
 # Error Handlers
