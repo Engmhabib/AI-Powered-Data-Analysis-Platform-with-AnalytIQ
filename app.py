@@ -39,14 +39,24 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 def interpret_query(user_query):
     # Use OpenAI API to interpret the query using ChatCompletion
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are an assistant that determines which analyses to perform based on a user's query. Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts. Provide the options as a JSON object with keys as options and values as true or false. For example: {'descriptive_statistics': true, 'correlation_matrix': false, ...}"},
-            {"role": "user", "content": user_query}
-        ],
-        max_tokens=150,
-        temperature=0
-    )
+    model="gpt-3.5-turbo",
+    messages=[
+        {
+            "role": "system",
+            "content": (
+                "You are an assistant that determines which analyses to perform based on a user's query. "
+                "Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts. "
+                "Provide only the options as a JSON object with keys as options and values as true or false. "
+                "Do not include any additional text or explanations. "
+                "For example: {\"descriptive_statistics\": true, \"correlation_matrix\": false}"
+            )
+        },
+        {"role": "user", "content": user_query}
+    ],
+    max_tokens=150,
+    temperature=0
+)
+
 
     # Default analysis parameters
     analysis_params = {
