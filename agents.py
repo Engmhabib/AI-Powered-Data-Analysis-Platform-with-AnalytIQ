@@ -18,13 +18,38 @@ class DataProcessingAgent:
     def process(self, df):
         try:
             # Data Cleaning Steps (Example)
-            df = df.dropna()  # Remove missing values
-            logger.info("Missing values removed.")
+            df = df.drop_duplicates()
+            logger.info("Duplicates removed.")
 
             # Additional preprocessing can be added here
             return df
         except Exception as e:
             logger.error(f"Error in DataProcessingAgent: {e}")
+            raise e
+
+class PreprocessingAgent:
+    """
+    Agent responsible for further cleaning and preprocessing the dataset.
+    """
+    def preprocess(self, df):
+        try:
+            # Identify numeric and categorical columns
+            categorical_columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
+            numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
+
+            # Handle missing values
+            df[categorical_columns] = df[categorical_columns].fillna('Unknown')
+            df[numeric_columns] = df[numeric_columns].fillna(df[numeric_columns].mean())
+
+            # Convert date columns to datetime
+            for col in df.columns:
+                if 'date' in col.lower():
+                    df[col] = pd.to_datetime(df[col], errors='coerce')
+
+            logger.info("Data preprocessing completed.")
+            return df
+        except Exception as e:
+            logger.error(f"Error in PreprocessingAgent: {e}")
             raise e
 
 class AnalysisAgent:
@@ -62,7 +87,7 @@ class AnalysisAgent:
 
             # Value Counts for Categorical Variables
             if analysis_params.get("value_counts", False):
-                categorical_cols = df.select_dtypes(include='object').columns
+                categorical_cols = df.select_dtypes(include=['object', 'category']).columns
                 value_counts = {col: df[col].value_counts().to_dict() for col in categorical_cols}
                 # Convert NumPy data types to native Python types
                 value_counts = self.convert_to_native_types(value_counts)
@@ -101,7 +126,7 @@ class VisualizationAgent:
             if "descriptive_statistics" in analysis_results:
                 desc_stats = analysis_results["descriptive_statistics"]
                 # Get the mean values from descriptive statistics
-                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float))}
+                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float, float))}
                 categories = list(means.keys())
                 mean_values = list(means.values())
 
