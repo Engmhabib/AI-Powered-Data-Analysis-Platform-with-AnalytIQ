@@ -5,37 +5,63 @@
 <head>
     <meta charset="UTF-8">
     <title>Data Analysis App</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>Upload Your CSV Dataset</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes">
-          {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    <form method="post" enctype="multipart/form-data">
-        <label for="dataset">Choose CSV File:</label>
-        <input type="file" name="dataset" id="dataset" accept=".csv" required><br><br>
+    <div class="container mt-5">
+        <h1 class="mb-4">Upload Your CSV Dataset</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="alert alert-warning" role="alert">
+              {% for category, message in messages %}
+                <p class="mb-0">{{ message }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="dataset">Choose CSV File:</label>
+                <input type="file" name="dataset" id="dataset" accept=".csv" class="form-control-file" required>
+            </div>
 
-        <h3>Analysis Parameters:</h3>
-        <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" checked>
-        <label for="descriptive_statistics">Descriptive Statistics</label><br>
-        <input type="checkbox" name="correlation_matrix" id="correlation_matrix" checked>
-        <label for="correlation_matrix">Correlation Matrix</label><br>
-        <input type="checkbox" name="missing_values" id="missing_values">
-        <label for="missing_values">Missing Values Analysis</label><br>
-        <input type="checkbox" name="value_counts" id="value_counts">
-        <label for="value_counts">Value Counts for Categorical Variables</label><br><br>
+            <h3 class="mt-4">Analysis Parameters:</h3>
+            <div class="form-check">
+                <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" class="form-check-input" checked>
+                <label for="descriptive_statistics" class="form-check-label">Descriptive Statistics</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" name="correlation_matrix" id="correlation_matrix" class="form-check-input" checked>
+                <label for="correlation_matrix" class="form-check-label">Correlation Matrix</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" name="missing_values" id="missing_values" class="form-check-input">
+                <label for="missing_values" class="form-check-label">Missing Values Analysis</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" name="value_counts" id="value_counts" class="form-check-input">
+                <label for="value_counts" class="form-check-label">Value Counts for Categorical Variables</label>
+            </div>
 
-        <label for="styling_params">Styling Parameters:</label><br>
-        <textarea name="styling_params" id="styling_params" rows="4" cols="50" placeholder="Enter any styling preferences here...">Default styling.</textarea><br><br>
+            <div class="form-group mt-4">
+                <label for="user_query">Or ask a question:</label>
+                <input type="text" name="user_query" id="user_query" class="form-control" placeholder="e.g., What is the correlation between age and income?">
+                <small class="form-text text-muted">You can enter a natural language query instead of selecting parameters above.</small>
+            </div>
 
-        <button type="submit">Analyze</button>
-    </form>
+            <div class="form-group">
+                <label for="styling_params">Styling Parameters:</label>
+                <textarea name="styling_params" id="styling_params" rows="4" class="form-control" placeholder="Enter any styling preferences here...">Default styling.</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Analyze</button>
+        </form>
+    </div>
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
