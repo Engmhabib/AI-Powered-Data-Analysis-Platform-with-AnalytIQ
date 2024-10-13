@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import pandas as pd
 from agents import DataProcessingAgent, PreprocessingAgent, AnalysisAgent, VisualizationAgent
 import openai
+import json
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -40,22 +41,27 @@ def interpret_query(user_query):
         max_tokens=150,
         temperature=0
     )
-    # Extract the analysis parameters from the response
+    
     analysis_params = {
         "descriptive_statistics": False,
         "correlation_matrix": False,
         "missing_values": False,
         "value_counts": False
     }
+    
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
-        import json
         analysis_params.update(json.loads(ai_response))
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON Decode Error interpreting AI response: {e}")
+        flash('There was an issue interpreting your query. Default analysis will be performed.', 'warning')
+        analysis_params["descriptive_statistics"] = True
     except Exception as e:
         logger.error(f"Error interpreting AI response: {e}")
-        # Default to descriptive statistics if AI response is invalid
+        flash('Error processing your query. Please try again.', 'danger')
         analysis_params["descriptive_statistics"] = True
+        
     return analysis_params
 
 def perform_analysis(data):
@@ -99,7 +105,8 @@ def perform_analysis(data):
     response = {
         "analysis": analysis_results,
         "commentary": commentary,
-        "graphJSON": graphJSON
+        "graphJSON": graphJSON,
+        "openai_response_text": data.get('openai_response_text', 'No OpenAI query provided.')
     }
 
     return response, 200
@@ -135,6 +142,7 @@ def index():
             if user_query:
                 # Interpret the user's natural language query
                 analysis_params = interpret_query(user_query)
+                openai_response_text = analysis_params.get("openai_response_text", "")
             else:
                 # Get analysis parameters from the form
                 analysis_params = {
@@ -143,6 +151,7 @@ def index():
                     "missing_values": 'missing_values' in request.form,
                     "value_counts": 'value_counts' in request.form
                 }
+                openai_response_text = "No query was provided."
 
             # Get styling parameters
             styling_params = request.form.get('styling_params', 'Default styling.')
@@ -151,7 +160,8 @@ def index():
             data = {
                 "dataframe": df,
                 "analysis_params": analysis_params,
-                "styling_params": styling_params
+                "styling_params": styling_params,
+                "openai_response_text": openai_response_text
             }
 
             # Call the analysis function directly
@@ -160,7 +170,12 @@ def index():
                 analysis = result.get("analysis", {})
                 commentary = result.get("commentary", "")
                 graphJSON = result.get("graphJSON", None)
-                return render_template('analysis.html', analysis=analysis, commentary=commentary, graphJSON=graphJSON)
+                openai_response_text = result.get("openai_response_text", "No response from OpenAI.")
+                return render_template('analysis.html', 
+                                       analysis=analysis, 
+                                       commentary=commentary, 
+                                       graphJSON=graphJSON, 
+                                       openai_response_text=openai_response_text)
             else:
                 flash(result.get("error", "An error occurred while processing your request."), 'danger')
                 logger.error(f"Analysis Error: {result.get('error')}")
@@ -173,7 +188,6 @@ def index():
     return render_template('index.html')
 
 # Error Handlers
-
 @app.errorhandler(404)
 def page_not_found(e):
     logger.error(f"Page not found: {e}")
