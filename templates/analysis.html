@@ -64,8 +64,13 @@
                 {% if graphJSON %}
                     <div id="plotly-div" class="mt-4"></div>
                     <script type="text/javascript">
-                        var graphData = JSON.parse(`{{ graphJSON | tojson | safe }}`);
-                        Plotly.newPlot('plotly-div', graphData.data, graphData.layout);
+                        try {
+                            var graphData = JSON.parse(`{{ graphJSON | safe }}`);
+                            Plotly.newPlot('plotly-div', graphData.data, graphData.layout);
+                        } catch (e) {
+                            console.error("Error parsing graphJSON:", e);
+                            document.getElementById('plotly-div').innerHTML = "<p>Error displaying visualization.</p>";
+                        }
                     </script>
                 {% else %}
                     <p class="mt-4">No visualization available.</p>
