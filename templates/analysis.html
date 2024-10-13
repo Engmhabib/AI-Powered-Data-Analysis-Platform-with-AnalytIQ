@@ -64,6 +64,16 @@
     <div class="container mt-5">
         <h1>Analysis Results</h1>
 
+        <!-- Show OpenAI query result -->
+        {% if openai_response_text %}
+            <div class="alert alert-info" role="alert">
+                <h3>AI Interpretation:</h3>
+                <p>{{ openai_response_text }}</p>
+            </div>
+        {% else %}
+            <p>No AI response to show.</p>
+        {% endif %}
+
         <!-- Tabs for different sections -->
         <ul class="nav nav-tabs mt-4" id="analysisTabs" role="tablist">
             <li class="nav-item">
