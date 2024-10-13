@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import logging
-import json
+from sklearn.cluster import KMeans
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -94,10 +94,47 @@ class AnalysisAgent:
                 analysis_results["value_counts"] = value_counts
                 logger.info("Value counts for categorical variables generated.")
 
+            # Time Series Analysis
+            if analysis_params.get("time_series_analysis", False):
+                time_series_results = self.time_series_analysis(df)
+                analysis_results["time_series_analysis"] = time_series_results
+                logger.info("Time series analysis completed.")
+
+            # Clustering Analysis
+            if analysis_params.get("clustering_analysis", False):
+                clustering_results = self.clustering_analysis(df)
+                analysis_results["clustering_analysis"] = clustering_results
+                logger.info("Clustering analysis completed.")
+
             return analysis_results
         except Exception as e:
             logger.error(f"Error in AnalysisAgent.analyze: {e}")
             raise Exception(f"AnalysisAgent.analyze failed: {e}")
+
+    def time_series_analysis(self, df):
+        # Identify date columns
+        date_cols = df.select_dtypes(include=['datetime', 'datetime64']).columns
+        if not date_cols.empty:
+            date_col = date_cols[0]  # Use the first date column
+            df_sorted = df.sort_values(by=date_col)
+            time_series_summary = df_sorted.set_index(date_col).resample('M').mean().to_dict()
+            return self.convert_to_native_types(time_series_summary)
+        else:
+            logger.warning("No date columns found for time series analysis.")
+            return {}
+
+    def clustering_analysis(self, df):
+        numeric_df = df.select_dtypes(include='number').dropna()
+        if numeric_df.shape[0] > 0:
+            kmeans = KMeans(n_clusters=3)
+            kmeans.fit(numeric_df)
+            clusters = kmeans.labels_
+            df['Cluster'] = clusters
+            cluster_counts = df['Cluster'].value_counts().to_dict()
+            return self.convert_to_native_types(cluster_counts)
+        else:
+            logger.warning("No numeric data available for clustering.")
+            return {}
 
     def convert_to_native_types(self, data):
         """
@@ -157,6 +194,36 @@ class VisualizationAgent:
                 fig.update_layout(title_font_size=24)
 
                 commentary = "Generated a heatmap displaying the correlation matrix of the dataset."
+
+            elif "time_series_analysis" in analysis_results:
+                # For simplicity, let's plot the time series of the first numeric column
+                time_series_data = analysis_results["time_series_analysis"]
+                if time_series_data:
+                    # Assume that time_series_data is a dict of dicts
+                    first_metric = next(iter(time_series_data))
+                    dates = list(time_series_data[first_metric].keys())
+                    values = list(time_series_data[first_metric].values())
+                    fig = px.line(x=dates, y=values, title=f'Time Series of {first_metric}')
+                    commentary = f"Generated a time series plot for {first_metric}."
+                else:
+                    commentary = "No time series data available for visualization."
+                    fig = None
+
+            elif "clustering_analysis" in analysis_results:
+                # Scatter plot with clusters
+                if 'Cluster' in df.columns:
+                    numeric_cols = df.select_dtypes(include='number').columns.tolist()
+                    if len(numeric_cols) >= 2:
+                        fig = px.scatter(df, x=numeric_cols[0], y=numeric_cols[1], color='Cluster',
+                                         title='Clustering Analysis',
+                                         labels={'color': 'Cluster'})
+                        commentary = f"Generated a scatter plot with clusters based on {numeric_cols[0]} and {numeric_cols[1]}."
+                    else:
+                        commentary = "Not enough numeric columns for clustering visualization."
+                        fig = None
+                else:
+                    commentary = "No clustering data available for visualization."
+                    fig = None
 
             else:
                 # Fallback visualization
