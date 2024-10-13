@@ -3,8 +3,6 @@
 import pandas as pd
 import plotly.express as px
 import logging
-import json
-from plotly.utils import PlotlyJSONEncoder
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,10 +19,6 @@ class DataProcessingAgent:
             logger.info("Missing values removed.")
 
             # Additional preprocessing can be added here
-            # For example:
-            # - Handling duplicate entries
-            # - Encoding categorical variables
-            # - Scaling numerical features
             return df
         except Exception as e:
             logger.error(f"Error in DataProcessingAgent: {e}")
@@ -51,18 +45,7 @@ class AnalysisAgent:
                 analysis_results["correlation_matrix"] = correlation.to_dict()
                 logger.info("Correlation matrix generated.")
 
-            # Missing Values Analysis
-            if analysis_params.get("missing_values", False):
-                missing_values = df.isnull().sum().to_dict()
-                analysis_results["missing_values"] = missing_values
-                logger.info("Missing values analysis completed.")
-
-            # Value Counts for Categorical Variables
-            if analysis_params.get("value_counts", False):
-                categorical_cols = df.select_dtypes(include='object').columns
-                value_counts = {col: df[col].value_counts().to_dict() for col in categorical_cols}
-                analysis_results["value_counts"] = value_counts
-                logger.info("Value counts for categorical variables generated.")
+            # Additional analyses can be added based on analysis_params
 
             return analysis_results
         except Exception as e:
@@ -99,6 +82,7 @@ class VisualizationAgent:
                     commentary = "Generated a bar chart showcasing the mean values of each numerical column."
                 else:
                     commentary = "No numerical columns with mean values found for visualization."
+                    fig = None
 
             # Visualization based on Correlation Matrix
             elif "correlation_matrix" in analysis_results:
@@ -117,10 +101,11 @@ class VisualizationAgent:
 
             else:
                 commentary = "No visualizations generated based on the analysis results."
+                fig = None
 
             if fig is not None:
-                # Serialize figure to JSON string using PlotlyJSONEncoder
-                graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+                # Convert the figure to a dictionary suitable for serialization
+                graphJSON = fig.to_plotly_json()
             else:
                 graphJSON = None
 
