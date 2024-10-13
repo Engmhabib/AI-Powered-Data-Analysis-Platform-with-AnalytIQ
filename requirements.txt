@@ -3,8 +3,10 @@ boto3==1.26.97
 Pillow==10.0.1
 Werkzeug==2.3.4
 numpy==1.23.5
-Flask==2.3.2
 pandas==1.5.3
 plotly==5.15.0
 kaleido==0.2.1
 gunicorn==21.2.0
+Flask==2.2.5
+Flask-Cors==3.0.10
+python-dotenv==1.0.0
