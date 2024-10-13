@@ -1,48 +1,72 @@
 <!-- templates/analysis.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Analysis Results - Auto-Analyst</title>
+    <title>Analysis Results</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Analysis Results</h1>
-    </header>
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+    <h1>Analysis Results</h1>
+    
+    <h2>Commentary</h2>
+    <p>{{ commentary }}</p>
+    
+    <h2>Visualization</h2>
+    <!-- Embed Plotly Visualizations -->
+    {% if image_url %}
+        <img src="{{ image_url }}" alt="Visualization Image">
+    {% else %}
+        <p>No visualization available.</p>
+    {% endif %}
+    
+    <h2>Analysis Details</h2>
+    <div class="analysis-details">
+        <h3>Descriptive Statistics</h3>
+        {% if analysis.descriptive_statistics %}
+            <table border="1">
+                <tr>
+                    <th>Metric</th>
+                    <th>100g_USD</th>
+                    <th>Rating</th>
+                </tr>
+                {% for key, value in analysis.descriptive_statistics.items() %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value.mean }}</td>
+                    <td>{{ value.mean }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No descriptive statistics available.</p>
+        {% endif %}
         
-        <div>
-            <h2>Commentary</h2>
-            <p>{{ commentary }}</p>
-        </div>
-        
-        <div>
-            <h2>Visualization</h2>
-            {% if image_url %}
-                <img src="{{ image_url }}" alt="Visualization">
-            {% else %}
-                <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No Visualization Available">
-            {% endif %}
-        </div>
-        
-        <div>
-            <h2>Analysis Details</h2>
-            {% if analysis %}
-                <pre>{{ analysis | tojson(indent=4) }}</pre>
-            {% else %}
-                <p>No analysis details available.</p>
-            {% endif %}
-        </div>
-        
-        <a href="{{ url_for('index') }}">Analyze Another Dataset</a>
+        <h3>Correlation Matrix</h3>
+        {% if analysis.correlation_matrix %}
+            <table border="1">
+                <tr>
+                    <th></th>
+                    {% for col in analysis.correlation_matrix.keys() %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+                {% for row_key, row_values in analysis.correlation_matrix.items() %}
+                <tr>
+                    <td>{{ row_key }}</td>
+                    {% for col_key in analysis.correlation_matrix.keys() %}
+                        <td>{{ row_values[col_key] }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No correlation matrix available.</p>
+        {% endif %}
     </div>
+    
+    <a href="{{ url_for('index') }}">Perform Another Analysis</a>
 </body>
 </html>
