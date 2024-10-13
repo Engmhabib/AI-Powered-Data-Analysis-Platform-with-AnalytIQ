@@ -3,13 +3,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import os
 import logging
-import requests
-from werkzeug.utils import secure_filename
-from agents import DataProcessingAgent, AnalysisAgent, VisualizationAgent
 import uuid
 from io import BytesIO
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
+from werkzeug.utils import secure_filename
+from agents import DataProcessingAgent, AnalysisAgent, VisualizationAgent
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -72,6 +71,65 @@ def upload_image_to_s3(image, filename):
         logger.error(f"Failed to upload image to S3: {e}")
         return ""
 
+def perform_analysis(data):
+    """
+    Perform the entire analysis workflow:
+    1. Data Processing
+    2. Data Analysis
+    3. Data Visualization
+    4. Uploading the visualization to S3
+    """
+    dataset = data.get("dataset", "")
+    analysis_params = data.get("analysis_params", {})
+    styling_params = data.get("styling_params", "Default styling.")
+
+    if not dataset:
+        return {"error": "No dataset provided."}, 400
+
+    # Step 1: Data Processing
+    try:
+        processed_data = data_processing_agent.process(dataset)
+    except Exception as e:
+        logger.error(f"DataProcessingAgent failed: {e}")
+        return {"error": "Data processing failed."}, 500
+
+    # Step 2: Data Analysis
+    try:
+        analysis_results = analysis_agent.analyze(processed_data, analysis_params)
+    except Exception as e:
+        logger.error(f"AnalysisAgent failed: {e}")
+        return {"error": "Data analysis failed."}, 500
+
+    # Step 3: Data Visualization
+    try:
+        visualization_code, commentary = visualization_agent.visualize(processed_data, analysis_results, styling_params)
+    except Exception as e:
+        logger.error(f"VisualizationAgent failed: {e}")
+        return {"error": "Data visualization failed."}, 500
+
+    # Step 4: Execute Visualization Code and Upload Image
+    try:
+        exec_globals = {}
+        exec(visualization_code, exec_globals)
+        plotly_fig = exec_globals.get("fig", None)
+        if plotly_fig:
+            unique_filename = f"{uuid.uuid4()}.png"
+            image_url = upload_image_to_s3(plotly_fig, unique_filename)
+        else:
+            image_url = ""
+    except Exception as e:
+        logger.error(f"Failed to execute visualization code: {e}")
+        image_url = ""
+
+    # Prepare response
+    response = {
+        "analysis": analysis_results,
+        "commentary": commentary,
+        "image_url": image_url if image_url else f"https://{s3_bucket}.s3.amazonaws.com/placeholder.png"
+    }
+
+    return response, 200
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -103,30 +161,23 @@ def index():
             # Get styling parameters
             styling_params = request.form.get('styling_params', 'Default styling.')
             
-            # Prepare data to send to backend API
+            # Prepare data to send to analysis function
             data = {
                 "dataset": dataset_path,
                 "analysis_params": analysis_params,
                 "styling_params": styling_params
             }
             
-            try:
-                # Send request to backend API
-                backend_url = os.environ.get('BACKEND_URL', 'http://localhost:5001/api/analyze')
-                response = requests.post(backend_url, json=data)
-                if response.status_code == 200:
-                    result = response.json()
-                    analysis = result.get("analysis", {})
-                    commentary = result.get("commentary", "")
-                    image_url = result.get("image_url", url_for('static', filename='images/placeholder.png'))
-                    return render_template('analysis.html', analysis=analysis, commentary=commentary, image_url=image_url)
-                else:
-                    flash('An error occurred while processing your request.', 'danger')
-                    logger.error(f"Backend Error: {response.text}")
-                    return redirect(request.url)
-            except Exception as e:
-                flash('Failed to connect to the backend server.', 'danger')
-                logger.error(f"Connection Error: {e}")
+            # Call the analysis function directly
+            result, status_code = perform_analysis(data)
+            if status_code == 200:
+                analysis = result.get("analysis", {})
+                commentary = result.get("commentary", "")
+                image_url = result.get("image_url", url_for('static', filename='images/placeholder.png'))
+                return render_template('analysis.html', analysis=analysis, commentary=commentary, image_url=image_url)
+            else:
+                flash(result.get("error", "An error occurred while processing your request."), 'danger')
+                logger.error(f"Analysis Error: {result.get('error')}")
                 return redirect(request.url)
         
         else:
@@ -134,60 +185,6 @@ def index():
             return redirect(request.url)
     
     return render_template('index.html')
-
-@app.route('/api/analyze', methods=['POST'])
-def analyze():
-    data = request.get_json()
-    dataset = data.get("dataset", "")
-    analysis_params = data.get("analysis_params", {})
-    styling_params = data.get("styling_params", "Default styling.")
-
-    if not dataset:
-        return jsonify({"error": "No dataset provided."}), 400
-
-    # Step 1: Data Processing
-    try:
-        processed_data = data_processing_agent.process(dataset)
-    except Exception as e:
-        logger.error(f"DataProcessingAgent failed: {e}")
-        return jsonify({"error": "Data processing failed."}), 500
-
-    # Step 2: Data Analysis
-    try:
-        analysis_results = analysis_agent.analyze(processed_data, analysis_params)
-    except Exception as e:
-        logger.error(f"AnalysisAgent failed: {e}")
-        return jsonify({"error": "Data analysis failed."}), 500
-
-    # Step 3: Data Visualization
-    try:
-        visualization_code, commentary = visualization_agent.visualize(processed_data, analysis_results, styling_params)
-    except Exception as e:
-        logger.error(f"VisualizationAgent failed: {e}")
-        return jsonify({"error": "Data visualization failed."}), 500
-
-    # Step 4: Execute Visualization Code and Upload Image
-    try:
-        exec_globals = {}
-        exec(visualization_code, exec_globals)
-        plotly_fig = exec_globals.get("fig", None)
-        if plotly_fig:
-            unique_filename = f"{uuid.uuid4()}.png"
-            image_url = upload_image_to_s3(plotly_fig, unique_filename)
-        else:
-            image_url = ""
-    except Exception as e:
-        logger.error(f"Failed to execute visualization code: {e}")
-        image_url = ""
-
-    # Prepare response
-    response = {
-        "analysis": analysis_results,
-        "commentary": commentary,
-        "image_url": image_url if image_url else f"https://{s3_bucket}.s3.amazonaws.com/placeholder.png"
-    }
-
-    return jsonify(response), 200
 
 # Error Handlers
 @app.errorhandler(404)
