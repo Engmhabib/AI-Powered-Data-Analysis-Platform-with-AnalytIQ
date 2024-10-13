@@ -3,7 +3,6 @@ import numpy as np
 import plotly.express as px
 import logging
 import json
-from plotly.utils import PlotlyJSONEncoder
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -15,14 +14,14 @@ class DataProcessingAgent:
     """
     def process(self, df):
         try:
-            # Data Cleaning Steps (Example)
+            # Data Cleaning Steps
             df = df.drop_duplicates()
             logger.info(f"Duplicates removed. Data now has {df.shape[0]} rows and {df.shape[1]} columns.")
             # Additional preprocessing can be added here
             return df
         except Exception as e:
-            logger.error(f"Error in DataProcessingAgent: {e}")
-            raise e
+            logger.error(f"Error in DataProcessingAgent.process: {e}")
+            raise Exception(f"DataProcessingAgent.process failed: {e}")
 
 class PreprocessingAgent:
     """
@@ -43,7 +42,7 @@ class PreprocessingAgent:
                 if 'date' in col.lower():
                     df[col] = pd.to_datetime(df[col], errors='coerce')
 
-            # Handle mixed data types (e.g., object columns that should be numeric)
+            # Handle mixed data types
             for col in df.columns:
                 if df[col].dtype == 'object':
                     try:
@@ -54,8 +53,8 @@ class PreprocessingAgent:
             logger.info("Data preprocessing completed.")
             return df
         except Exception as e:
-            logger.error(f"Error in PreprocessingAgent: {e}")
-            raise e
+            logger.error(f"Error in PreprocessingAgent.preprocess: {e}")
+            raise Exception(f"PreprocessingAgent.preprocess failed: {e}")
 
 class AnalysisAgent:
     """
@@ -68,7 +67,6 @@ class AnalysisAgent:
             # Descriptive Statistics
             if analysis_params.get("descriptive_statistics", False):
                 descriptive_stats = df.describe(include='all').to_dict()
-                # Convert NumPy data types to native Python types
                 descriptive_stats = self.convert_to_native_types(descriptive_stats)
                 analysis_results["descriptive_statistics"] = descriptive_stats
                 logger.info("Descriptive statistics generated.")
@@ -77,7 +75,6 @@ class AnalysisAgent:
             if analysis_params.get("correlation_matrix", False):
                 numeric_df = df.select_dtypes(include='number')
                 correlation = numeric_df.corr().to_dict()
-                # Convert NumPy data types to native Python types
                 correlation = self.convert_to_native_types(correlation)
                 analysis_results["correlation_matrix"] = correlation
                 logger.info("Correlation matrix generated.")
@@ -85,7 +82,6 @@ class AnalysisAgent:
             # Missing Values Analysis
             if analysis_params.get("missing_values", False):
                 missing_values = df.isnull().sum().to_dict()
-                # Convert NumPy data types to native Python types
                 missing_values = self.convert_to_native_types(missing_values)
                 analysis_results["missing_values"] = missing_values
                 logger.info("Missing values analysis completed.")
@@ -94,28 +90,27 @@ class AnalysisAgent:
             if analysis_params.get("value_counts", False):
                 categorical_cols = df.select_dtypes(include=['object', 'category']).columns
                 value_counts = {col: df[col].value_counts().to_dict() for col in categorical_cols}
-                # Convert NumPy data types to native Python types
                 value_counts = self.convert_to_native_types(value_counts)
                 analysis_results["value_counts"] = value_counts
                 logger.info("Value counts for categorical variables generated.")
 
             return analysis_results
         except Exception as e:
-            logger.error(f"Error in AnalysisAgent: {e}")
-            raise e
+            logger.error(f"Error in AnalysisAgent.analyze: {e}")
+            raise Exception(f"AnalysisAgent.analyze failed: {e}")
 
     def convert_to_native_types(self, data):
         """
-        Recursively convert NumPy data types to native Python types.
+        Recursively convert NumPy and pandas data types to native Python types.
         """
         if isinstance(data, dict):
             return {k: self.convert_to_native_types(v) for k, v in data.items()}
         elif isinstance(data, list):
             return [self.convert_to_native_types(v) for v in data]
-        elif isinstance(data, np.generic):
-            return data.item()  # Handle NumPy scalars
+        elif isinstance(data, (np.integer, np.floating, np.bool_)):
+            return data.item()
         elif pd.isnull(data):
-            return None  # Handle NaNs
+            return None
         else:
             return data
 
@@ -125,15 +120,12 @@ class VisualizationAgent:
     """
     def visualize(self, df, analysis_results, styling_params):
         try:
-            # Initialize empty figure
             fig = None
             commentary = ""
 
-            # Visualization based on Descriptive Statistics
             if "descriptive_statistics" in analysis_results:
                 desc_stats = analysis_results["descriptive_statistics"]
-                # Get the mean values from descriptive statistics
-                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float))}
+                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float, float))}
                 categories = list(means.keys())
                 mean_values = list(means.values())
 
@@ -143,7 +135,7 @@ class VisualizationAgent:
                         y=mean_values,
                         title='Mean Values of Numerical Columns',
                         labels={'x': 'Columns', 'y': 'Mean Value'},
-                        color_discrete_sequence=px.colors.qualitative.Pastel  # Custom color scheme example
+                        color_discrete_sequence=px.colors.qualitative.Pastel
                     )
                     fig.update_layout(title_font_size=24)
 
@@ -152,7 +144,6 @@ class VisualizationAgent:
                     commentary = "No numerical columns with mean values found for visualization."
                     fig = None
 
-            # Visualization based on Correlation Matrix
             elif "correlation_matrix" in analysis_results:
                 correlation = analysis_results["correlation_matrix"]
                 df_corr = pd.DataFrame(correlation)
@@ -167,23 +158,23 @@ class VisualizationAgent:
 
                 commentary = "Generated a heatmap displaying the correlation matrix of the dataset."
 
-            # Scatter plot example based on Correlation Matrix
-            elif "correlation_matrix" in analysis_results and df.shape[1] >= 2:
-                columns = df.select_dtypes(include='number').columns[:2]
-                fig = px.scatter(df, x=columns[0], y=columns[1], title=f'Scatter Plot of {columns[0]} vs {columns[1]}')
-                commentary = f"Generated a scatter plot for the correlation between {columns[0]} and {columns[1]}."
-
             else:
-                commentary = "No visualizations generated based on the analysis results."
-                fig = None
+                # Fallback visualization
+                numeric_cols = df.select_dtypes(include='number').columns
+                if len(numeric_cols) >= 2:
+                    fig = px.scatter(df, x=numeric_cols[0], y=numeric_cols[1],
+                                     title=f'Scatter Plot of {numeric_cols[0]} vs {numeric_cols[1]}')
+                    commentary = f"Generated a scatter plot for {numeric_cols[0]} vs {numeric_cols[1]}."
+                else:
+                    commentary = "No suitable data for visualization."
+                    fig = None
 
-            if fig is not None:
-                # Serialize figure to JSON string using PlotlyJSONEncoder
-                graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+            if fig:
+                graphJSON = fig.to_json()
             else:
                 graphJSON = None
 
             return graphJSON, commentary
         except Exception as e:
-            logger.error(f"Error in VisualizationAgent: {e}")
-            raise e
+            logger.error(f"Error in VisualizationAgent.visualize: {e}")
+            raise Exception(f"VisualizationAgent.visualize failed: {e}")
