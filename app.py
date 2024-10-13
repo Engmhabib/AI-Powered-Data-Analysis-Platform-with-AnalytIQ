@@ -34,7 +34,7 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 def interpret_query(user_query):
     # Use OpenAI API to interpret the query
     response = openai.Completion.create(
-        engine="text-davinci-003",
+        model="gpt-3.5-turbo",
         prompt=f"Analyze the following query and determine which analysis to perform: '{user_query}'\nOptions: descriptive_statistics, correlation_matrix, missing_values, value_counts\nProvide the options as a JSON object with keys as options and values as true or false.",
         max_tokens=150,
         n=1,
