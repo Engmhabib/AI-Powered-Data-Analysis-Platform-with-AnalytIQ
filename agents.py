@@ -65,31 +65,34 @@ class VisualizationAgent:
                 categories = list(desc_stats.keys())
                 means = [desc_stats[cat]["mean"] for cat in categories]
 
-                visualization_code = f"""
-import plotly.express as px
+                fig_bar = px.bar(x=categories, y=means, title='Mean Values of Categories',
+                                 labels={'x': 'Category', 'y': 'Mean Value'})
+                fig_bar.update_layout(title_font_size=24)
 
-fig = px.bar(x={categories}, y={means}, title='Mean Values of Categories')
-fig.update_layout(title_font_size=24)
-"""
                 commentary = "Generated a bar chart showcasing the mean values of each category."
-                return visualization_code, commentary
+
+                return fig_bar, commentary  # Return the figure object and commentary
 
             # Example Visualization: Heatmap of Correlation Matrix
             elif "correlation_matrix" in analysis_results:
                 correlation = analysis_results["correlation_matrix"]
+                df_corr = pd.DataFrame(correlation)
 
-                visualization_code = f"""
-import plotly.express as px
+                fig_heatmap = px.imshow(
+                    df_corr,
+                    text_auto=True,
+                    title='Correlation Matrix',
+                    labels=dict(x="Variables", y="Variables", color="Correlation Coefficient")
+                )
+                fig_heatmap.update_layout(title_font_size=24)
 
-fig = px.imshow({correlation}, text_auto=True, title='Correlation Matrix')
-fig.update_layout(title_font_size=24)
-"""
                 commentary = "Generated a heatmap displaying the correlation matrix of the dataset."
-                return visualization_code, commentary
+
+                return fig_heatmap, commentary  # Return the figure object and commentary
 
             else:
                 commentary = "No visualizations generated based on the analysis results."
-                return "", commentary
+                return None, commentary
         except Exception as e:
             logger.error(f"Error in VisualizationAgent: {e}")
             raise e
