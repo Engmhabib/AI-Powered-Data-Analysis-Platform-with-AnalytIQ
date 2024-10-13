@@ -1,45 +1,37 @@
 <!-- templates/index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Auto-Analyst - Data Analysis</title>
+    <title>Data Analysis App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Auto-Analyst: Data Analysis Agent</h1>
-    </header>
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+    <h1>Upload Your CSV Dataset</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <form method="post" enctype="multipart/form-data">
+        <label for="dataset">Choose CSV File:</label>
+        <input type="file" name="dataset" id="dataset" accept=".csv" required><br><br>
         
-        <form method="POST" enctype="multipart/form-data">
-            <label for="dataset">Upload Dataset (CSV):</label>
-            <input type="file" id="dataset" name="dataset" accept=".csv" required>
-            
-            <label for="descriptive_statistics">
-                <input type="checkbox" id="descriptive_statistics" name="descriptive_statistics">
-                Descriptive Statistics
-            </label>
-            
-            <label for="correlation_matrix">
-                <input type="checkbox" id="correlation_matrix" name="correlation_matrix">
-                Correlation Matrix
-            </label>
-            
-            <!-- Add more analysis parameters as needed -->
-            
-            <label for="styling_params">Styling Instructions:</label>
-            <textarea id="styling_params" name="styling_params" rows="4" placeholder="e.g., Use vibrant colors, set title font size to 20px"></textarea>
-            
-            <button type="submit">Analyze Data</button>
-        </form>
-    </div>
+        <h3>Analysis Parameters:</h3>
+        <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" checked>
+        <label for="descriptive_statistics">Descriptive Statistics</label><br>
+        <input type="checkbox" name="correlation_matrix" id="correlation_matrix" checked>
+        <label for="correlation_matrix">Correlation Matrix</label><br><br>
+        
+        <label for="styling_params">Styling Parameters:</label><br>
+        <textarea name="styling_params" id="styling_params" rows="4" cols="50" placeholder="Enter any styling preferences here...">Default styling.</textarea><br><br>
+        
+        <button type="submit">Analyze</button>
+    </form>
 </body>
 </html>
