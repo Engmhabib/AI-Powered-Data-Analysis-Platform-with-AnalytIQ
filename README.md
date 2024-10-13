@@ -1,14 +1,246 @@
-data-analysis-app/
-│
-├── app.py                 # Main application file
-├── agents.py              # Agents handling data processing, analysis, and visualization
-├── requirements.txt       # Python dependencies
-├── runtime.txt            # Heroku runtime configuration
-├── templates/             # HTML templates for the Flask app
-│   ├── index.html         # Upload form
-│   ├── analysis.html      # Analysis results page
-├── static/                # Static assets (CSS, JS, etc.)
-│   └── css/
-│       └── styles.css     # Custom CSS styles
-├── Procfile               # Heroku process file
-└── README.md              # Project documentation
+**Explanation of the Agents:**
+
+In your Flask application, you have structured the data analysis workflow using four distinct agents:
+
+1. **DataProcessingAgent**
+2. **PreprocessingAgent**
+3. **AnalysisAgent**
+4. **VisualizationAgent**
+
+These agents are designed to modularize the steps involved in data analysis, making the code more organized, maintainable, and scalable.
+
+### 1. **DataProcessingAgent**
+
+- **Purpose:** Responsible for initial data cleaning tasks.
+- **Functions:**
+  - Removes duplicate rows from the dataset.
+  - Logs the status of the dataset after cleaning.
+- **Considered AI or Automation?** This agent performs automated data cleaning tasks using predefined rules and methods from pandas. It does not incorporate any AI algorithms. Therefore, it is considered **automation**.
+
+### 2. **PreprocessingAgent**
+
+- **Purpose:** Handles further preprocessing of the dataset to prepare it for analysis.
+- **Functions:**
+  - Identifies numeric and categorical columns.
+  - Handles missing values by imputing means for numeric columns and filling 'Unknown' for categorical columns.
+  - Converts date columns to datetime objects.
+  - Attempts to convert object-type columns to numeric where possible.
+- **Considered AI or Automation?** This agent automates data preprocessing steps using standard techniques. It does not involve AI but follows set rules and heuristics. Therefore, it is considered **automation**.
+
+### 3. **AnalysisAgent**
+
+- **Purpose:** Performs statistical analyses on the dataset based on specified parameters.
+- **Functions:**
+  - Generates descriptive statistics.
+  - Computes the correlation matrix.
+  - Analyzes missing values.
+  - Counts values for categorical variables.
+- **Considered AI or Automation?** The analyses performed are statistical computations using pandas and numpy libraries. They do not involve AI algorithms. Hence, this agent is also considered **automation**.
+
+### 4. **VisualizationAgent**
+
+- **Purpose:** Creates visual representations of the analysis results.
+- **Functions:**
+  - Generates bar charts, heatmaps, or scatter plots based on the analysis results.
+  - Provides commentary on the generated visualizations.
+- **Considered AI or Automation?** The visualizations are created using Plotly, based on predefined logic and the data provided. No AI techniques are used. Therefore, this agent is considered **automation**.
+
+### **Integration with AI:**
+
+The AI component in your application resides in the `interpret_query` function within `app.py`. This function uses OpenAI's GPT-3.5-turbo model to interpret the user's natural language query and map it to specific analysis parameters.
+
+- **Functionality:**
+  - Accepts a natural language query from the user.
+  - Sends the query to the OpenAI API for interpretation.
+  - Parses the AI's response to determine which analyses to perform.
+- **Considered AI or Automation?** This function leverages AI (specifically NLP capabilities of GPT-3.5-turbo) to understand and process human language. Therefore, this component is considered **AI**.
+
+**Summary:**
+
+- The agents (`DataProcessingAgent`, `PreprocessingAgent`, `AnalysisAgent`, `VisualizationAgent`) are part of the application's automation framework, handling data processing tasks through programmed logic.
+- The use of OpenAI's API for query interpretation introduces AI capabilities into the application, enabling it to understand and process natural language inputs.
+
+---
+
+**README File for GitHub Repository:**
+
+Below is a comprehensive `README.md` file for your GitHub repository:
+
+---
+
+# Data Analysis Web Application
+
+A Flask-based web application that allows users to upload CSV datasets, perform statistical analyses, and visualize results. The app integrates AI capabilities to interpret natural language queries using OpenAI's GPT-3.5-turbo model.
+
+## Table of Contents
+
+- [Features](#features)
+- [Demo](#demo)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Agents Explained](#agents-explained)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- **Data Upload:** Users can upload CSV files up to 10 MB.
+- **Analysis Parameters:** Choose from predefined analysis options or input a natural language query.
+- **AI Query Interpretation:** Utilizes OpenAI's GPT-3.5-turbo model to interpret user queries and determine analysis parameters.
+- **Data Processing:** Automated data cleaning and preprocessing.
+- **Statistical Analysis:** Generates descriptive statistics, correlation matrices, missing values analysis, and value counts.
+- **Data Visualization:** Creates interactive Plotly graphs based on analysis results.
+- **Results Presentation:** Displays analysis results, visualizations, and AI interpretations in a user-friendly interface.
+
+## Demo
+
+![Demo Screenshot](demo_screenshot.png)
+
+*Note: Replace `demo_screenshot.png` with an actual screenshot of your application.*
+
+## Installation
+
+### Prerequisites
+
+- Python 3.7 or higher
+- pip (Python package installer)
+- An OpenAI API key (for AI query interpretation)
+
+### Setup
+
+1. **Clone the Repository:**
+
+   ```bash
+   git clone https://github.com/your_username/your_repository_name.git
+   cd your_repository_name
+   ```
+
+2. **Create a Virtual Environment:**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+
+3. **Install Dependencies:**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set Environment Variables:**
+
+   Create a `.env` file in the root directory and add the following:
+
+   ```env
+   OPENAI_API_KEY=your_openai_api_key
+   SECRET_KEY=your_secret_key
+   ```
+
+   Replace `your_openai_api_key` with your actual OpenAI API key and `your_secret_key` with a secret key for Flask sessions.
+
+5. **Run the Application:**
+
+   ```bash
+   python app.py
+   ```
+
+6. **Access the App:**
+
+   Open your web browser and navigate to `http://localhost:5000`.
+
+## Usage
+
+1. **Upload Dataset:**
+
+   - Click on "Choose CSV File" to upload your dataset.
+   - Ensure the file is a valid CSV and less than 10 MB.
+
+2. **Select Analysis Parameters:**
+
+   - Choose the analyses you want to perform by checking the appropriate boxes.
+   - Alternatively, enter a natural language query in the "Or ask a question" field.
+
+3. **Styling Parameters:**
+
+   - Optionally, enter any styling preferences for the visualizations.
+
+4. **Run Analysis:**
+
+   - Click the "Analyze" button to perform the analysis.
+
+5. **View Results:**
+
+   - After processing, you will be presented with the analysis results, visualizations, and AI interpretation.
+
+6. **Perform Another Analysis:**
+
+   - Click on the "Perform Another Analysis" button to start over.
+
+## Project Structure
+
+```
+├── app.py
+├── agents.py
+├── templates
+│   ├── index.html
+│   └── analysis.html
+├── static
+│   └── css
+│       └── styles.css
+├── requirements.txt
+├── README.md
+└── .env  # Should not be checked into version control
+```
+
+- **app.py:** Main Flask application file.
+- **agents.py:** Contains the agent classes for data processing, preprocessing, analysis, and visualization.
+- **templates:** HTML templates for rendering pages.
+- **static:** Static files like CSS and images.
+- **requirements.txt:** Python dependencies.
+- **.env:** Environment variables (should be excluded from version control).
+
+## Agents Explained
+
+### DataProcessingAgent
+
+- **Role:** Cleans the dataset by removing duplicates and performing initial data cleaning steps.
+- **Automation:** Uses pandas functions to automate data cleaning.
+
+### PreprocessingAgent
+
+- **Role:** Preprocesses the data by handling missing values, converting data types, and preparing the data for analysis.
+- **Automation:** Automates data preprocessing using standard techniques.
+
+### AnalysisAgent
+
+- **Role:** Performs statistical analyses based on specified parameters.
+- **Automation:** Computes statistics like mean, median, correlation, etc., using pandas and numpy.
+
+### VisualizationAgent
+
+- **Role:** Generates visualizations from the analysis results.
+- **Automation:** Creates charts and graphs using Plotly based on the data.
+
+### AI Integration
+
+- **Function:** The `interpret_query` function uses OpenAI's GPT-3.5-turbo model to interpret natural language queries.
+- **AI Component:** Allows the application to understand and process user queries, mapping them to specific analysis actions.
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Commit your changes with clear messages.
+4. Push your changes to your fork.
+5. Submit a pull request.
+
+## License
+
+This project is licensed under the MIT License.
+
