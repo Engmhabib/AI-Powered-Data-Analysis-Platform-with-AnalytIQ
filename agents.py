@@ -3,8 +3,6 @@
 import pandas as pd
 import plotly.express as px
 import logging
-import json
-from plotly.utils import PlotlyJSONEncoder
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -100,8 +98,8 @@ class VisualizationAgent:
                 commentary = "No visualizations generated based on the analysis results."
 
             if fig is not None:
-                # Serialize figure to JSON
-                graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+                # Convert the figure to a dictionary
+                graphJSON = fig.to_dict()
             else:
                 graphJSON = None
 
