@@ -5,8 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Analysis Results</title>
-    <!-- Include Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.6.0/css/bootstrap.min.css">
+    <!-- Include Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include the correct Plotly.js library -->
@@ -14,12 +16,15 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Analysis Results</h1>
+        <div class="text-center mb-5">
+            <h1 class="mb-3">Analysis Results</h1>
+            <p class="lead">Here are the insights from your data.</p>
+        </div>
 
         <!-- Show OpenAI query result -->
         {% if openai_response_text %}
             <div class="alert alert-info" role="alert">
-                <h3>AI Interpretation:</h3>
+                <h4 class="alert-heading">AI Interpretation:</h4>
                 <p>{{ openai_response_text }}</p>
             </div>
         {% else %}
@@ -30,64 +35,76 @@
 
         <!-- Tabs for different sections -->
         <ul class="nav nav-tabs mt-4" id="analysisTabs" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="commentary-tab" data-toggle="tab" href="#commentary" role="tab">Commentary</a>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="commentary-tab" data-bs-toggle="tab" data-bs-target="#commentary" type="button" role="tab">
+                    Commentary
+                </button>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" id="visualization-tab" data-toggle="tab" href="#visualization" role="tab">Visualization</a>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="visualization-tab" data-bs-toggle="tab" data-bs-target="#visualization" type="button" role="tab">
+                    Visualization
+                </button>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" id="details-tab" data-toggle="tab" href="#details" role="tab">Analysis Details</a>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                    Analysis Details
+                </button>
             </li>
         </ul>
 
         <!-- Tab Content -->
         <div class="tab-content" id="analysisTabsContent">
             <div class="tab-pane fade show active" id="commentary" role="tabpanel">
-                <p class="mt-3">{{ commentary }}</p>
+                <div class="mt-4">
+                    <p>{{ commentary }}</p>
+                </div>
             </div>
 
             <div class="tab-pane fade" id="visualization" role="tabpanel">
                 {% if graphJSON %}
-                    <div id="plotly-div" class="mt-3"></div>
+                    <div id="plotly-div" class="mt-4"></div>
                     <script type="text/javascript">
                         var graphData = JSON.parse(`{{ graphJSON | tojson | safe }}`);
                         Plotly.newPlot('plotly-div', graphData.data, graphData.layout);
                     </script>
                 {% else %}
-                    <p class="mt-3">No visualization available.</p>
+                    <p class="mt-4">No visualization available.</p>
                 {% endif %}
             </div>
 
             <div class="tab-pane fade" id="details" role="tabpanel">
                 <!-- Analysis Details Section -->
-                <div class="analysis-details mt-3">
+                <div class="analysis-details mt-4">
                     <!-- Descriptive Statistics -->
                     {% if analysis.descriptive_statistics %}
                         <h3>Descriptive Statistics</h3>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th>Statistic</th>
-                                    {% for col in analysis.descriptive_statistics.keys() %}
-                                        <th>{{ col }}</th>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Statistic</th>
+                                        {% for col in analysis.descriptive_statistics.keys() %}
+                                            <th>{{ col }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set stats = (analysis.descriptive_statistics.values() | first).keys %}
+                                    {% for stat in stats %}
+                                    <tr>
+                                        <td>{{ stat }}</td>
+                                        {% for col in analysis.descriptive_statistics.keys() %}
+                                            <td>
+                                                {% if analysis.descriptive_statistics[col][stat] | is_number %}
+                                                    {{ analysis.descriptive_statistics[col][stat] | round(2) }}
+                                                {% else %}
+                                                    {{ analysis.descriptive_statistics[col][stat] }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
                                     {% endfor %}
-                                </tr>
-                                {% set stats = (analysis.descriptive_statistics.values() | first).keys %}
-                                {% for stat in stats %}
-                                <tr>
-                                    <td>{{ stat }}</td>
-                                    {% for col in analysis.descriptive_statistics.keys() %}
-                                        <td>
-                                            {% if analysis.descriptive_statistics[col][stat] | is_number %}
-                                                {{ analysis.descriptive_statistics[col][stat] | round(2) }}
-                                            {% else %}
-                                                {{ analysis.descriptive_statistics[col][stat] }}
-                                            {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% else %}
@@ -96,29 +113,33 @@
 
                     <!-- Correlation Matrix -->
                     {% if analysis.correlation_matrix %}
-                        <h3>Correlation Matrix</h3>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th></th>
-                                    {% for col in analysis.correlation_matrix.keys() %}
-                                        <th>{{ col }}</th>
+                        <h3 class="mt-5">Correlation Matrix</h3>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th></th>
+                                        {% for col in analysis.correlation_matrix.keys() %}
+                                            <th>{{ col }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row_key, row_values in analysis.correlation_matrix.items() %}
+                                    <tr>
+                                        <td>{{ row_key }}</td>
+                                        {% for col_key in analysis.correlation_matrix.keys() %}
+                                            <td>
+                                                {% if row_values[col_key] | is_number %}
+                                                    {{ row_values[col_key] | round(2) }}
+                                                {% else %}
+                                                    {{ row_values[col_key] }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
                                     {% endfor %}
-                                </tr>
-                                {% for row_key, row_values in analysis.correlation_matrix.items() %}
-                                <tr>
-                                    <td>{{ row_key }}</td>
-                                    {% for col_key in analysis.correlation_matrix.keys() %}
-                                        <td>
-                                            {% if row_values[col_key] | is_number %}
-                                                {{ row_values[col_key] | round(2) }}
-                                            {% else %}
-                                                {{ row_values[col_key] }}
-                                            {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% else %}
@@ -127,19 +148,23 @@
 
                     <!-- Missing Values Analysis -->
                     {% if analysis.missing_values %}
-                        <h3>Missing Values</h3>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <tr>
-                                    <th>Column</th>
-                                    <th>Missing Values</th>
-                                </tr>
-                                {% for col, missing in analysis.missing_values.items() %}
-                                <tr>
-                                    <td>{{ col }}</td>
-                                    <td>{{ missing }}</td>
-                                </tr>
-                                {% endfor %}
+                        <h3 class="mt-5">Missing Values</h3>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Column</th>
+                                        <th>Missing Values</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for col, missing in analysis.missing_values.items() %}
+                                    <tr>
+                                        <td>{{ col }}</td>
+                                        <td>{{ missing }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                     {% else %}
@@ -148,21 +173,25 @@
 
                     <!-- Value Counts for Categorical Variables -->
                     {% if analysis.value_counts %}
-                        <h3>Value Counts for Categorical Variables</h3>
+                        <h3 class="mt-5">Value Counts for Categorical Variables</h3>
                         {% for col, counts in analysis.value_counts.items() %}
-                            <h4>{{ col }}</h4>
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <tr>
-                                        <th>Value</th>
-                                        <th>Count</th>
-                                    </tr>
-                                    {% for value, count in counts.items() %}
-                                    <tr>
-                                        <td>{{ value }}</td>
-                                        <td>{{ count }}</td>
-                                    </tr>
-                                    {% endfor %}
+                            <h4 class="mt-4">{{ col }}</h4>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Value</th>
+                                            <th>Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for value, count in counts.items() %}
+                                        <tr>
+                                            <td>{{ value }}</td>
+                                            <td>{{ count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
                                 </table>
                             </div>
                         {% endfor %}
@@ -174,11 +203,14 @@
             </div>
         </div>
 
-        <a href="{{ url_for('index') }}" class="btn btn-secondary mt-4">Perform Another Analysis</a>
+        <div class="text-center mt-5">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-redo me-2"></i>Perform Another Analysis
+            </a>
+        </div>
     </div>
 
-    <!-- Include Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Include Bootstrap 5 JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
