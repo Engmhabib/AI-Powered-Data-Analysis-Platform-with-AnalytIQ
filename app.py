@@ -69,15 +69,17 @@ def interpret_query(user_query):
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
+        # Replace single quotes with double quotes if necessary
+        ai_response_json = ai_response.replace("'", '"')
         # Parse the AI response
-        parsed_response = json.loads(ai_response.lower())
+        parsed_response = json.loads(ai_response_json)
         # Update analysis parameters
         analysis_params.update(parsed_response)
     except json.JSONDecodeError as e:
         logger.error(f"JSON Decode Error interpreting AI response: {e}")
         flash('There was an issue interpreting your query. Default analysis will be performed.', 'warning')
         analysis_params["descriptive_statistics"] = True
-        ai_response = "There was an issue interpreting your query. Default analysis will be performed."
+        # Retain the original AI response for display
     except Exception as e:
         logger.error(f"Error interpreting AI response: {e}")
         flash('Error processing your query. Please try again.', 'danger')
