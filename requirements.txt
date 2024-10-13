@@ -7,3 +7,4 @@ boto3==1.26.97
 Pillow==10.0.1
 Werkzeug==2.3.4
 numpy==1.23.5
+kaleido==0.2.1
