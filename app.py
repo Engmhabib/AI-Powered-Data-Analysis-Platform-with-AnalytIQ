@@ -52,6 +52,7 @@ def interpret_query(user_query):
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
+        # Update analysis params based on OpenAI's response
         analysis_params.update(json.loads(ai_response))
     except json.JSONDecodeError as e:
         logger.error(f"JSON Decode Error interpreting AI response: {e}")
@@ -62,7 +63,7 @@ def interpret_query(user_query):
         flash('Error processing your query. Please try again.', 'danger')
         analysis_params["descriptive_statistics"] = True
         
-    return analysis_params
+    return analysis_params, ai_response
 
 def perform_analysis(data):
     """
@@ -75,7 +76,8 @@ def perform_analysis(data):
     df = data.get("dataframe")
     analysis_params = data.get("analysis_params", {})
     styling_params = data.get("styling_params", "Default styling.")
-
+    openai_response_text = data.get("openai_response_text", "No AI query provided.")
+    
     if df is None:
         return {"error": "No dataset provided."}, 400
 
@@ -106,7 +108,7 @@ def perform_analysis(data):
         "analysis": analysis_results,
         "commentary": commentary,
         "graphJSON": graphJSON,
-        "openai_response_text": data.get('openai_response_text', 'No OpenAI query provided.')
+        "openai_response_text": openai_response_text
     }
 
     return response, 200
@@ -114,76 +116,39 @@ def perform_analysis(data):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        # Handle file upload
-        if 'dataset' not in request.files:
-            flash('No file part in the form.', 'danger')
-            return redirect(request.url)
-
         file = request.files['dataset']
-
-        # If user does not select file, browser may submit an empty part
-        if file.filename == '':
-            flash('No selected file.', 'danger')
-            return redirect(request.url)
-
         if file and allowed_file(file.filename):
-            # Read the uploaded file directly into a DataFrame
-            try:
-                df = pd.read_csv(file)
-            except Exception as e:
-                logger.error(f"Failed to read CSV file: {e}")
-                flash('Failed to read CSV file. Please ensure it is a valid CSV.', 'danger')
-                return redirect(request.url)
-
-            logger.info("Dataset uploaded and read successfully.")
-
+            df = pd.read_csv(file)
             user_query = request.form.get('user_query', '')
-
             if user_query:
-                # Interpret the user's natural language query
-                analysis_params = interpret_query(user_query)
-                openai_response_text = analysis_params.get("openai_response_text", "")
+                # Interpret user's natural language query
+                analysis_params, openai_response_text = interpret_query(user_query)
             else:
-                # Get analysis parameters from the form
                 analysis_params = {
                     "descriptive_statistics": 'descriptive_statistics' in request.form,
                     "correlation_matrix": 'correlation_matrix' in request.form,
                     "missing_values": 'missing_values' in request.form,
                     "value_counts": 'value_counts' in request.form
                 }
-                openai_response_text = "No query was provided."
+                openai_response_text = "No AI query was provided."
 
-            # Get styling parameters
-            styling_params = request.form.get('styling_params', 'Default styling.')
-
-            # Prepare data to send to analysis function
             data = {
                 "dataframe": df,
                 "analysis_params": analysis_params,
-                "styling_params": styling_params,
+                "styling_params": request.form.get('styling_params', 'Default styling.'),
                 "openai_response_text": openai_response_text
             }
-
-            # Call the analysis function directly
             result, status_code = perform_analysis(data)
             if status_code == 200:
-                analysis = result.get("analysis", {})
-                commentary = result.get("commentary", "")
-                graphJSON = result.get("graphJSON", None)
-                openai_response_text = result.get("openai_response_text", "No response from OpenAI.")
                 return render_template('analysis.html', 
-                                       analysis=analysis, 
-                                       commentary=commentary, 
-                                       graphJSON=graphJSON, 
-                                       openai_response_text=openai_response_text)
+                                       analysis=result["analysis"], 
+                                       commentary=result["commentary"], 
+                                       graphJSON=result["graphJSON"], 
+                                       openai_response_text=result["openai_response_text"])
             else:
-                flash(result.get("error", "An error occurred while processing your request."), 'danger')
-                logger.error(f"Analysis Error: {result.get('error')}")
-                return redirect(request.url)
-
+                flash(result["error"], 'danger')
         else:
-            flash('Allowed file types are CSV.', 'warning')
-            return redirect(request.url)
+            flash('Invalid file format. Only CSV files are allowed.', 'danger')
 
     return render_template('index.html')
 
