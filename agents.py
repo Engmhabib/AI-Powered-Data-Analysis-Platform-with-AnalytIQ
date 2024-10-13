@@ -43,7 +43,8 @@ class AnalysisAgent:
 
             # Example Analysis: Correlation Matrix
             if analysis_params.get("correlation_matrix", False):
-                correlation = df.corr()
+                # Select only numeric columns to avoid FutureWarning
+                correlation = df.select_dtypes(include='number').corr()
                 analysis_results["correlation_matrix"] = correlation.to_dict()
                 logger.info("Correlation matrix generated.")
 
@@ -65,8 +66,12 @@ class VisualizationAgent:
                 categories = list(desc_stats.keys())
                 means = [desc_stats[cat]["mean"] for cat in categories]
 
-                fig_bar = px.bar(x=categories, y=means, title='Mean Values of Categories',
-                                 labels={'x': 'Category', 'y': 'Mean Value'})
+                fig_bar = px.bar(
+                    x=categories,
+                    y=means,
+                    title='Mean Values of Categories',
+                    labels={'x': 'Category', 'y': 'Mean Value'}
+                )
                 fig_bar.update_layout(title_font_size=24)
 
                 commentary = "Generated a bar chart showcasing the mean values of each category."
