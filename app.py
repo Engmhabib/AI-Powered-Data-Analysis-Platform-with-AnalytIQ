@@ -1,6 +1,6 @@
 # app.py
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 import logging
 import uuid
@@ -9,6 +9,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 from werkzeug.utils import secure_filename
 from agents import DataProcessingAgent, AnalysisAgent, VisualizationAgent
+import plotly.io as pio  # Ensure plotly.io is imported
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -46,16 +47,14 @@ s3_client = boto3.client(
     aws_secret_access_key=s3_secret_key
 )
 
-def upload_image_to_s3(image, filename):
+def upload_image_to_s3(fig, filename):
     try:
-        # Convert Plotly figure to image bytes
-        img_byte_arr = BytesIO()
-        image.write_image(img_byte_arr, format='PNG')
-        img_byte_arr.seek(0)
+        # Convert Plotly figure to image bytes using kaleido
+        img_bytes = fig.to_image(format="png")  # Uses kaleido by default
 
         # Upload to S3
         s3_client.upload_fileobj(
-            img_byte_arr,
+            BytesIO(img_bytes),
             s3_bucket,
             filename,
             ExtraArgs={'ContentType': 'image/png'}
@@ -102,30 +101,27 @@ def perform_analysis(data):
 
     # Step 3: Data Visualization
     try:
-        visualization_code, commentary = visualization_agent.visualize(processed_data, analysis_results, styling_params)
+        fig, commentary = visualization_agent.visualize(processed_data, analysis_results, styling_params)
     except Exception as e:
         logger.error(f"VisualizationAgent failed: {e}")
         return {"error": "Data visualization failed."}, 500
 
     # Step 4: Execute Visualization Code and Upload Image
-    try:
-        exec_globals = {}
-        exec(visualization_code, exec_globals)
-        plotly_fig = exec_globals.get("fig", None)
-        if plotly_fig:
+    if fig:
+        try:
             unique_filename = f"{uuid.uuid4()}.png"
-            image_url = upload_image_to_s3(plotly_fig, unique_filename)
-        else:
-            image_url = ""
-    except Exception as e:
-        logger.error(f"Failed to execute visualization code: {e}")
-        image_url = ""
+            image_url = upload_image_to_s3(fig, unique_filename)
+        except Exception as e:
+            logger.error(f"Failed to upload visualization to S3: {e}")
+            image_url = f"https://{s3_bucket}.s3.amazonaws.com/placeholder.png"
+    else:
+        image_url = f"https://{s3_bucket}.s3.amazonaws.com/placeholder.png"
 
     # Prepare response
     response = {
         "analysis": analysis_results,
         "commentary": commentary,
-        "image_url": image_url if image_url else f"https://{s3_bucket}.s3.amazonaws.com/placeholder.png"
+        "image_url": image_url
     }
 
     return response, 200
