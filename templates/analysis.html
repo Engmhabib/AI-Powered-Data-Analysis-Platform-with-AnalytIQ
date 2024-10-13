@@ -89,7 +89,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% set stats = (analysis.descriptive_statistics.values() | first).keys %}
+                                    {% set stats = (analysis.descriptive_statistics.values() | first).keys() %}
                                     {% for stat in stats %}
                                     <tr>
                                         <td>{{ stat }}</td>
