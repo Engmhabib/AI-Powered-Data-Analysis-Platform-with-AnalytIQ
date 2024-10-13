@@ -21,16 +21,16 @@
     <form method="post" enctype="multipart/form-data">
         <label for="dataset">Choose CSV File:</label>
         <input type="file" name="dataset" id="dataset" accept=".csv" required><br><br>
-        
+
         <h3>Analysis Parameters:</h3>
         <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" checked>
         <label for="descriptive_statistics">Descriptive Statistics</label><br>
         <input type="checkbox" name="correlation_matrix" id="correlation_matrix" checked>
         <label for="correlation_matrix">Correlation Matrix</label><br><br>
-        
+
         <label for="styling_params">Styling Parameters:</label><br>
         <textarea name="styling_params" id="styling_params" rows="4" cols="50" placeholder="Enter any styling preferences here...">Default styling.</textarea><br><br>
-        
+
         <button type="submit">Analyze</button>
     </form>
 </body>
