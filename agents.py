@@ -1,5 +1,3 @@
-# agents.py
-
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -19,8 +17,7 @@ class DataProcessingAgent:
         try:
             # Data Cleaning Steps (Example)
             df = df.drop_duplicates()
-            logger.info("Duplicates removed.")
-
+            logger.info(f"Duplicates removed. Data now has {df.shape[0]} rows and {df.shape[1]} columns.")
             # Additional preprocessing can be added here
             return df
         except Exception as e:
@@ -45,6 +42,14 @@ class PreprocessingAgent:
             for col in df.columns:
                 if 'date' in col.lower():
                     df[col] = pd.to_datetime(df[col], errors='coerce')
+
+            # Handle mixed data types (e.g., object columns that should be numeric)
+            for col in df.columns:
+                if df[col].dtype == 'object':
+                    try:
+                        df[col] = pd.to_numeric(df[col], errors='ignore')
+                    except Exception as e:
+                        logger.warning(f"Failed to convert column {col} to numeric. Skipping conversion.")
 
             logger.info("Data preprocessing completed.")
             return df
@@ -108,7 +113,9 @@ class AnalysisAgent:
         elif isinstance(data, list):
             return [self.convert_to_native_types(v) for v in data]
         elif isinstance(data, np.generic):
-            return data.item()
+            return data.item()  # Handle NumPy scalars
+        elif pd.isnull(data):
+            return None  # Handle NaNs
         else:
             return data
 
@@ -126,7 +133,7 @@ class VisualizationAgent:
             if "descriptive_statistics" in analysis_results:
                 desc_stats = analysis_results["descriptive_statistics"]
                 # Get the mean values from descriptive statistics
-                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float, float))}
+                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float))}
                 categories = list(means.keys())
                 mean_values = list(means.values())
 
@@ -135,7 +142,8 @@ class VisualizationAgent:
                         x=categories,
                         y=mean_values,
                         title='Mean Values of Numerical Columns',
-                        labels={'x': 'Columns', 'y': 'Mean Value'}
+                        labels={'x': 'Columns', 'y': 'Mean Value'},
+                        color_discrete_sequence=px.colors.qualitative.Pastel  # Custom color scheme example
                     )
                     fig.update_layout(title_font_size=24)
 
@@ -158,6 +166,12 @@ class VisualizationAgent:
                 fig.update_layout(title_font_size=24)
 
                 commentary = "Generated a heatmap displaying the correlation matrix of the dataset."
+
+            # Scatter plot example based on Correlation Matrix
+            elif "correlation_matrix" in analysis_results and df.shape[1] >= 2:
+                columns = df.select_dtypes(include='number').columns[:2]
+                fig = px.scatter(df, x=columns[0], y=columns[1], title=f'Scatter Plot of {columns[0]} vs {columns[1]}')
+                commentary = f"Generated a scatter plot for the correlation between {columns[0]} and {columns[1]}."
 
             else:
                 commentary = "No visualizations generated based on the analysis results."
