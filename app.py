@@ -5,6 +5,7 @@ import pandas as pd
 from agents import DataProcessingAgent, PreprocessingAgent, AnalysisAgent, VisualizationAgent
 import openai
 import json
+import re  # Import re module for regex
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -44,17 +45,16 @@ def interpret_query(user_query):
             {
                 "role": "system",
                 "content": (
-                    "You are an assistant that determines which analyses to perform based on a user's query. "
+                    "You are an assistant that helps determine which analyses to perform based on a user's query and provides insights. "
+                    "First, provide the analyses as a JSON object enclosed in triple backticks, like ```{...}```. "
                     "Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts, "
                     "time_series_analysis, clustering_analysis. "
-                    "Provide only the options as a JSON object with keys as options and values as true or false. "
-                    "Do not include any additional text or explanations. "
-                    "For example: {\"descriptive_statistics\": true, \"clustering_analysis\": true}"
+                    "Then, provide a brief natural language explanation of the insights you can offer based on the user's query."
                 )
             },
             {"role": "user", "content": user_query}
         ],
-        max_tokens=150,
+        max_tokens=500,
         temperature=0
     )
 
@@ -71,22 +71,34 @@ def interpret_query(user_query):
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
-        # Ensure the AI response is valid JSON
-        parsed_response = json.loads(ai_response)
-        # Update analysis parameters
-        analysis_params.update(parsed_response)
+
+        # Extract JSON object enclosed in triple backticks
+        match = re.search(r'```(.*?)```', ai_response, re.DOTALL)
+        if match:
+            json_str = match.group(1).strip()
+            parsed_response = json.loads(json_str)
+            # Update analysis parameters
+            analysis_params.update(parsed_response)
+            # Remove JSON part to get the explanation
+            explanation = ai_response.replace(f'```{json_str}```', '').strip()
+            openai_response_text = explanation
+        else:
+            # If no JSON found, default to descriptive statistics
+            analysis_params["descriptive_statistics"] = True
+            openai_response_text = ai_response  # Treat entire response as explanation
+
     except json.JSONDecodeError as e:
         logger.error(f"JSON Decode Error interpreting AI response: {e}")
         flash('There was an issue interpreting your query. Default analysis will be performed.', 'warning')
         analysis_params["descriptive_statistics"] = True
-        # Retain the original AI response for display
+        openai_response_text = ai_response  # Use AI response as explanation
     except Exception as e:
         logger.error(f"Error interpreting AI response: {e}")
         flash('Error processing your query. Please try again.', 'danger')
         analysis_params["descriptive_statistics"] = True
-        ai_response = "Error processing your query. Default analysis will be performed."
+        openai_response_text = "Error processing your query. Default analysis will be performed."
 
-    return analysis_params, ai_response
+    return analysis_params, openai_response_text
 
 def perform_analysis(data):
     """
