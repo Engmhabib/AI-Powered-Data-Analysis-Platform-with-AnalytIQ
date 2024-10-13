@@ -19,8 +19,9 @@
     {% if graphJSON %}
         <div id="plotly-div"></div>
         <script>
-            var graphData = {{ graphJSON | tojson }};
-            Plotly.newPlot('plotly-div', graphData.data, graphData.layout);
+            // Ensure the graphJSON is properly escaped and safe for embedding
+            var graphJSON = {{ graphJSON | safe }};
+            Plotly.newPlot('plotly-div', JSON.parse(graphJSON));
         </script>
     {% else %}
         <p>No visualization available.</p>
@@ -28,8 +29,10 @@
 
     <h2>Analysis Details</h2>
     <div class="analysis-details">
-        <h3>Descriptive Statistics</h3>
+
+        <!-- Descriptive Statistics -->
         {% if analysis.descriptive_statistics %}
+            <h3>Descriptive Statistics</h3>
             <table border="1">
                 <tr>
                     <th>Statistic</th>
@@ -37,12 +40,18 @@
                         <th>{{ col }}</th>
                     {% endfor %}
                 </tr>
-                {% set stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max'] %}
+                {% set stats = analysis.descriptive_statistics[analysis.descriptive_statistics.keys()|list|first].keys() %}
                 {% for stat in stats %}
                 <tr>
                     <td>{{ stat }}</td>
                     {% for col in analysis.descriptive_statistics.keys() %}
-                        <td>{{ analysis.descriptive_statistics[col][stat]|round(2) }}</td>
+                        <td>
+                            {% if analysis.descriptive_statistics[col][stat] is number %}
+                                {{ analysis.descriptive_statistics[col][stat]|round(2) }}
+                            {% else %}
+                                {{ analysis.descriptive_statistics[col][stat] }}
+                            {% endif %}
+                        </td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
@@ -51,8 +60,9 @@
             <p>No descriptive statistics available.</p>
         {% endif %}
 
-        <h3>Correlation Matrix</h3>
+        <!-- Correlation Matrix -->
         {% if analysis.correlation_matrix %}
+            <h3>Correlation Matrix</h3>
             <table border="1">
                 <tr>
                     <th></th>
@@ -72,6 +82,48 @@
         {% else %}
             <p>No correlation matrix available.</p>
         {% endif %}
+
+        <!-- Missing Values Analysis -->
+        {% if analysis.missing_values %}
+            <h3>Missing Values</h3>
+            <table border="1">
+                <tr>
+                    <th>Column</th>
+                    <th>Missing Values</th>
+                </tr>
+                {% for col, missing in analysis.missing_values.items() %}
+                <tr>
+                    <td>{{ col }}</td>
+                    <td>{{ missing }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No missing values analysis available.</p>
+        {% endif %}
+
+        <!-- Value Counts for Categorical Variables -->
+        {% if analysis.value_counts %}
+            <h3>Value Counts for Categorical Variables</h3>
+            {% for col, counts in analysis.value_counts.items() %}
+                <h4>{{ col }}</h4>
+                <table border="1">
+                    <tr>
+                        <th>Value</th>
+                        <th>Count</th>
+                    </tr>
+                    {% for value, count in counts.items() %}
+                    <tr>
+                        <td>{{ value }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No value counts available.</p>
+        {% endif %}
+
     </div>
 
     <a href="{{ url_for('index') }}">Perform Another Analysis</a>
