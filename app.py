@@ -39,31 +39,33 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 def interpret_query(user_query):
     # Use OpenAI API to interpret the query using ChatCompletion
     response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {
-            "role": "system",
-            "content": (
-                "You are an assistant that determines which analyses to perform based on a user's query. "
-                "Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts. "
-                "Provide only the options as a JSON object with keys as options and values as true or false. "
-                "Do not include any additional text or explanations. "
-                "For example: {\"descriptive_statistics\": true, \"correlation_matrix\": false}"
-            )
-        },
-        {"role": "user", "content": user_query}
-    ],
-    max_tokens=150,
-    temperature=0
-)
-
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are an assistant that determines which analyses to perform based on a user's query. "
+                    "Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts, "
+                    "time_series_analysis, clustering_analysis. "
+                    "Provide only the options as a JSON object with keys as options and values as true or false. "
+                    "Do not include any additional text or explanations. "
+                    "For example: {\"descriptive_statistics\": true, \"clustering_analysis\": true}"
+                )
+            },
+            {"role": "user", "content": user_query}
+        ],
+        max_tokens=150,
+        temperature=0
+    )
 
     # Default analysis parameters
     analysis_params = {
         "descriptive_statistics": False,
         "correlation_matrix": False,
         "missing_values": False,
-        "value_counts": False
+        "value_counts": False,
+        "time_series_analysis": False,
+        "clustering_analysis": False
     }
 
     try:
@@ -181,7 +183,9 @@ def index():
                     "descriptive_statistics": 'descriptive_statistics' in request.form,
                     "correlation_matrix": 'correlation_matrix' in request.form,
                     "missing_values": 'missing_values' in request.form,
-                    "value_counts": 'value_counts' in request.form
+                    "value_counts": 'value_counts' in request.form,
+                    "time_series_analysis": 'time_series_analysis' in request.form,
+                    "clustering_analysis": 'clustering_analysis' in request.form
                 }
                 openai_response_text = "No query was provided."
 
