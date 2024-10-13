@@ -20,9 +20,9 @@
     {% if graphJSON %}
         <div id="plotly-div"></div>
         <script type="text/javascript">
-            // Serialize graphJSON to JSON format and embed it safely
-            var graphData = {{ graphJSON | tojson }};
-            Plotly.newPlot('plotly-div', graphData);
+            // Embed the JSON string and parse it in JavaScript
+            var graphJSON = {{ graphJSON | safe }};
+            Plotly.newPlot('plotly-div', JSON.parse(graphJSON));
         </script>
     {% else %}
         <p>No visualization available.</p>
@@ -83,8 +83,46 @@
             <p>No correlation matrix available.</p>
         {% endif %}
 
-        <!-- Additional Analysis Sections (if any) -->
-        <!-- ... include any other analysis results here ... -->
+        <!-- Missing Values Analysis -->
+        {% if analysis.missing_values %}
+            <h3>Missing Values</h3>
+            <table border="1">
+                <tr>
+                    <th>Column</th>
+                    <th>Missing Values</th>
+                </tr>
+                {% for col, missing in analysis.missing_values.items() %}
+                <tr>
+                    <td>{{ col }}</td>
+                    <td>{{ missing }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No missing values analysis available.</p>
+        {% endif %}
+
+        <!-- Value Counts for Categorical Variables -->
+        {% if analysis.value_counts %}
+            <h3>Value Counts for Categorical Variables</h3>
+            {% for col, counts in analysis.value_counts.items() %}
+                <h4>{{ col }}</h4>
+                <table border="1">
+                    <tr>
+                        <th>Value</th>
+                        <th>Count</th>
+                    </tr>
+                    {% for value, count in counts.items() %}
+                    <tr>
+                        <td>{{ value }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No value counts available.</p>
+        {% endif %}
 
     </div>
 
