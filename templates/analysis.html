@@ -5,127 +5,156 @@
 <head>
     <meta charset="UTF-8">
     <title>Analysis Results</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include the correct Plotly.js library -->
     <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
 </head>
 <body>
-    <h1>Analysis Results</h1>
+    <div class="container mt-5">
+        <h1>Analysis Results</h1>
 
-    <h2>Commentary</h2>
-    <p>{{ commentary }}</p>
+        <!-- Tabs for different sections -->
+        <ul class="nav nav-tabs mt-4" id="analysisTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="commentary-tab" data-toggle="tab" href="#commentary" role="tab">Commentary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="visualization-tab" data-toggle="tab" href="#visualization" role="tab">Visualization</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="details-tab" data-toggle="tab" href="#details" role="tab">Analysis Details</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="analysisTabsContent">
+            <div class="tab-pane fade show active" id="commentary" role="tabpanel">
+                <p class="mt-3">{{ commentary }}</p>
+            </div>
+            <div class="tab-pane fade" id="visualization" role="tabpanel">
+                {% if graphJSON %}
+                    <div id="plotly-div" class="mt-3"></div>
+                    <script type="text/javascript">
+                        var graphJSON = JSON.parse(`{{ graphJSON | safe }}`);
+                        Plotly.newPlot('plotly-div', graphJSON);
+                    </script>
+                {% else %}
+                    <p class="mt-3">No visualization available.</p>
+                {% endif %}
+            </div>
+            <div class="tab-pane fade" id="details" role="tabpanel">
+                <!-- Analysis Details Section -->
+                <div class="analysis-details mt-3">
+                    <!-- Descriptive Statistics -->
+                    {% if analysis.descriptive_statistics %}
+                        <h3>Descriptive Statistics</h3>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Statistic</th>
+                                    {% for col in analysis.descriptive_statistics.keys() %}
+                                        <th>{{ col }}</th>
+                                    {% endfor %}
+                                </tr>
+                                {% set stats = analysis.descriptive_statistics[analysis.descriptive_statistics.keys()|list|first].keys() %}
+                                {% for stat in stats %}
+                                <tr>
+                                    <td>{{ stat }}</td>
+                                    {% for col in analysis.descriptive_statistics.keys() %}
+                                        <td>
+                                            {% if analysis.descriptive_statistics[col][stat] is number %}
+                                                {{ analysis.descriptive_statistics[col][stat]|round(2) }}
+                                            {% else %}
+                                                {{ analysis.descriptive_statistics[col][stat] }}
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No descriptive statistics available.</p>
+                    {% endif %}
 
-    <h2>Visualization</h2>
-    <!-- Embed Plotly Visualization -->
-    {% if graphJSON %}
-        <div id="plotly-div"></div>
-        <script type="text/javascript">
-            // Embed the JSON string and parse it in JavaScript
-            var graphJSON = {{ graphJSON | safe }};
-            Plotly.newPlot('plotly-div', JSON.parse(graphJSON));
-        </script>
-    {% else %}
-        <p>No visualization available.</p>
-    {% endif %}
+                    <!-- Correlation Matrix -->
+                    {% if analysis.correlation_matrix %}
+                        <h3>Correlation Matrix</h3>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th></th>
+                                    {% for col in analysis.correlation_matrix.keys() %}
+                                        <th>{{ col }}</th>
+                                    {% endfor %}
+                                </tr>
+                                {% for row_key, row_values in analysis.correlation_matrix.items() %}
+                                <tr>
+                                    <td>{{ row_key }}</td>
+                                    {% for col_key in analysis.correlation_matrix.keys() %}
+                                        <td>{{ row_values[col_key]|round(2) }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No correlation matrix available.</p>
+                    {% endif %}
 
-    <h2>Analysis Details</h2>
-    <div class="analysis-details">
-        <!-- Descriptive Statistics -->
-        {% if analysis.descriptive_statistics %}
-            <h3>Descriptive Statistics</h3>
-            <table border="1">
-                <tr>
-                    <th>Statistic</th>
-                    {% for col in analysis.descriptive_statistics.keys() %}
-                        <th>{{ col }}</th>
-                    {% endfor %}
-                </tr>
-                {% set stats = analysis.descriptive_statistics[analysis.descriptive_statistics.keys()|list|first].keys() %}
-                {% for stat in stats %}
-                <tr>
-                    <td>{{ stat }}</td>
-                    {% for col in analysis.descriptive_statistics.keys() %}
-                        <td>
-                            {% if analysis.descriptive_statistics[col][stat] is number %}
-                                {{ analysis.descriptive_statistics[col][stat]|round(2) }}
-                            {% else %}
-                                {{ analysis.descriptive_statistics[col][stat] }}
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </table>
-        {% else %}
-            <p>No descriptive statistics available.</p>
-        {% endif %}
+                    <!-- Missing Values Analysis -->
+                    {% if analysis.missing_values %}
+                        <h3>Missing Values</h3>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Missing Values</th>
+                                </tr>
+                                {% for col, missing in analysis.missing_values.items() %}
+                                <tr>
+                                    <td>{{ col }}</td>
+                                    <td>{{ missing }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No missing values analysis available.</p>
+                    {% endif %}
 
-        <!-- Correlation Matrix -->
-        {% if analysis.correlation_matrix %}
-            <h3>Correlation Matrix</h3>
-            <table border="1">
-                <tr>
-                    <th></th>
-                    {% for col in analysis.correlation_matrix.keys() %}
-                        <th>{{ col }}</th>
-                    {% endfor %}
-                </tr>
-                {% for row_key, row_values in analysis.correlation_matrix.items() %}
-                <tr>
-                    <td>{{ row_key }}</td>
-                    {% for col_key in analysis.correlation_matrix.keys() %}
-                        <td>{{ row_values[col_key]|round(2) }}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </table>
-        {% else %}
-            <p>No correlation matrix available.</p>
-        {% endif %}
+                    <!-- Value Counts for Categorical Variables -->
+                    {% if analysis.value_counts %}
+                        <h3>Value Counts for Categorical Variables</h3>
+                        {% for col, counts in analysis.value_counts.items() %}
+                            <h4>{{ col }}</h4>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>Value</th>
+                                        <th>Count</th>
+                                    </tr>
+                                    {% for value, count in counts.items() %}
+                                    <tr>
+                                        <td>{{ value }}</td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No value counts available.</p>
+                    {% endif %}
 
-        <!-- Missing Values Analysis -->
-        {% if analysis.missing_values %}
-            <h3>Missing Values</h3>
-            <table border="1">
-                <tr>
-                    <th>Column</th>
-                    <th>Missing Values</th>
-                </tr>
-                {% for col, missing in analysis.missing_values.items() %}
-                <tr>
-                    <td>{{ col }}</td>
-                    <td>{{ missing }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        {% else %}
-            <p>No missing values analysis available.</p>
-        {% endif %}
-
-        <!-- Value Counts for Categorical Variables -->
-        {% if analysis.value_counts %}
-            <h3>Value Counts for Categorical Variables</h3>
-            {% for col, counts in analysis.value_counts.items() %}
-                <h4>{{ col }}</h4>
-                <table border="1">
-                    <tr>
-                        <th>Value</th>
-                        <th>Count</th>
-                    </tr>
-                    {% for value, count in counts.items() %}
-                    <tr>
-                        <td>{{ value }}</td>
-                        <td>{{ count }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            {% endfor %}
-        {% else %}
-            <p>No value counts available.</p>
-        {% endif %}
-
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary mt-4">Perform Another Analysis</a>
     </div>
-
-    <a href="{{ url_for('index') }}">Perform Another Analysis</a>
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
