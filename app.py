@@ -99,7 +99,9 @@ def index():
             # Get analysis parameters from the form
             analysis_params = {
                 "descriptive_statistics": 'descriptive_statistics' in request.form,
-                "correlation_matrix": 'correlation_matrix' in request.form
+                "correlation_matrix": 'correlation_matrix' in request.form,
+                "missing_values": 'missing_values' in request.form,
+                "value_counts": 'value_counts' in request.form
                 # Add more parameters as needed
             }
 
