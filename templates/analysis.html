@@ -92,16 +92,16 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% set stats = (analysis.descriptive_statistics.values() | list)[0].keys() %}
+                                    {% set stats = analysis.descriptive_statistics | first[1].keys() %}
                                     {% for stat in stats %}
                                     <tr>
                                         <td>{{ stat }}</td>
-                                        {% for col in analysis.descriptive_statistics.keys() %}
+                                        {% for col, values in analysis.descriptive_statistics.items() %}
                                             <td>
-                                                {% if analysis.descriptive_statistics[col][stat] | is_number %}
-                                                    {{ analysis.descriptive_statistics[col][stat] | round(2) }}
+                                                {% if values[stat] is number %}
+                                                    {{ values[stat] | round(2) }}
                                                 {% else %}
-                                                    {{ analysis.descriptive_statistics[col][stat] }}
+                                                    {{ values[stat] }}
                                                 {% endif %}
                                             </td>
                                         {% endfor %}
@@ -133,7 +133,7 @@
                                         <td>{{ row_key }}</td>
                                         {% for col_key in analysis.correlation_matrix.keys() %}
                                             <td>
-                                                {% if row_values[col_key] | is_number %}
+                                                {% if row_values[col_key] is number %}
                                                     {{ row_values[col_key] | round(2) }}
                                                 {% else %}
                                                     {{ row_values[col_key] }}
