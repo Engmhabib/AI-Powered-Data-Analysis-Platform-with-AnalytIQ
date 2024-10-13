@@ -1,5 +1,3 @@
-# app.py
-
 import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -28,9 +26,8 @@ preprocessing_agent = PreprocessingAgent()
 analysis_agent = AnalysisAgent()
 visualization_agent = VisualizationAgent()
 
-# Load your OpenAI API key from an environment variable or secret management service
+# Load your OpenAI API key from an environment variable
 openai.api_key = os.environ.get('OPENAI_API_KEY')
-
 
 def interpret_query(user_query):
     # Use OpenAI API to interpret the query using ChatCompletion
@@ -44,7 +41,7 @@ def interpret_query(user_query):
         temperature=0
     )
     # Extract the analysis parameters from the response
-   analysis_params = {
+    analysis_params = {
         "descriptive_statistics": False,
         "correlation_matrix": False,
         "missing_values": False,
@@ -53,7 +50,6 @@ def interpret_query(user_query):
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
-        # Assuming the AI response is a JSON-like string
         import json
         analysis_params.update(json.loads(ai_response))
     except Exception as e:
