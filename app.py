@@ -71,10 +71,8 @@ def interpret_query(user_query):
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
-        # Replace single quotes with double quotes if necessary
-        ai_response_json = ai_response.replace("'", '"')
-        # Parse the AI response
-        parsed_response = json.loads(ai_response_json)
+        # Ensure the AI response is valid JSON
+        parsed_response = json.loads(ai_response)
         # Update analysis parameters
         analysis_params.update(parsed_response)
     except json.JSONDecodeError as e:
