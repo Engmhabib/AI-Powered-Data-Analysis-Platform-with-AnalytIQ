@@ -10,40 +10,48 @@
 </head>
 <body>
     <h1>Analysis Results</h1>
-    
+
     <h2>Commentary</h2>
     <p>{{ commentary }}</p>
-    
+
     <h2>Visualization</h2>
-    <!-- Embed Plotly Visualizations -->
-    {% if image_url %}
-        <img src="{{ image_url }}" alt="Visualization Image">
+    <!-- Embed Plotly Visualization -->
+    {% if graphJSON %}
+        <div id="plotly-div"></div>
+        <script>
+            var graphJSON = {{ graphJSON | safe }};
+            var parsedGraph = JSON.parse(graphJSON);
+            Plotly.newPlot('plotly-div', parsedGraph.data, parsedGraph.layout);
+        </script>
     {% else %}
         <p>No visualization available.</p>
     {% endif %}
-    
+
     <h2>Analysis Details</h2>
     <div class="analysis-details">
         <h3>Descriptive Statistics</h3>
         {% if analysis.descriptive_statistics %}
             <table border="1">
                 <tr>
-                    <th>Metric</th>
-                    <th>100g_USD</th>
-                    <th>Rating</th>
+                    <th>Statistic</th>
+                    {% for col in analysis.descriptive_statistics.keys() %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
                 </tr>
-                {% for key, value in analysis.descriptive_statistics.items() %}
+                {% set stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max'] %}
+                {% for stat in stats %}
                 <tr>
-                    <td>{{ key }}</td>
-                    <td>{{ value.mean }}</td>
-                    <td>{{ value.mean }}</td>
+                    <td>{{ stat }}</td>
+                    {% for col in analysis.descriptive_statistics.keys() %}
+                        <td>{{ analysis.descriptive_statistics[col][stat]|round(2) }}</td>
+                    {% endfor %}
                 </tr>
                 {% endfor %}
             </table>
         {% else %}
             <p>No descriptive statistics available.</p>
         {% endif %}
-        
+
         <h3>Correlation Matrix</h3>
         {% if analysis.correlation_matrix %}
             <table border="1">
@@ -57,7 +65,7 @@
                 <tr>
                     <td>{{ row_key }}</td>
                     {% for col_key in analysis.correlation_matrix.keys() %}
-                        <td>{{ row_values[col_key] }}</td>
+                        <td>{{ row_values[col_key]|round(2) }}</td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
@@ -66,7 +74,7 @@
             <p>No correlation matrix available.</p>
         {% endif %}
     </div>
-    
+
     <a href="{{ url_for('index') }}">Perform Another Analysis</a>
 </body>
 </html>
