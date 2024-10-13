@@ -31,25 +31,27 @@ visualization_agent = VisualizationAgent()
 # Load your OpenAI API key from an environment variable or secret management service
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
+
 def interpret_query(user_query):
-    # Use OpenAI API to interpret the query
-    response = openai.Completion.create(
+    # Use OpenAI API to interpret the query using ChatCompletion
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        prompt=f"Analyze the following query and determine which analysis to perform: '{user_query}'\nOptions: descriptive_statistics, correlation_matrix, missing_values, value_counts\nProvide the options as a JSON object with keys as options and values as true or false.",
+        messages=[
+            {"role": "system", "content": "You are an assistant that determines which analyses to perform based on a user's query. Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts. Provide the options as a JSON object with keys as options and values as true or false."},
+            {"role": "user", "content": user_query}
+        ],
         max_tokens=150,
-        n=1,
-        stop=None,
         temperature=0
     )
     # Extract the analysis parameters from the response
-    analysis_params = {
+   analysis_params = {
         "descriptive_statistics": False,
         "correlation_matrix": False,
         "missing_values": False,
         "value_counts": False
     }
     try:
-        ai_response = response.choices[0].text.strip()
+        ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
         # Assuming the AI response is a JSON-like string
         import json
