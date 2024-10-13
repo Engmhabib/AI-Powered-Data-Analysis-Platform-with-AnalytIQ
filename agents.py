@@ -44,7 +44,8 @@ class AnalysisAgent:
             # Example Analysis: Correlation Matrix
             if analysis_params.get("correlation_matrix", False):
                 # Select only numeric columns to avoid FutureWarning
-                correlation = df.select_dtypes(include='number').corr()
+                numeric_df = df.select_dtypes(include='number')
+                correlation = numeric_df.corr()
                 analysis_results["correlation_matrix"] = correlation.to_dict()
                 logger.info("Correlation matrix generated.")
 
