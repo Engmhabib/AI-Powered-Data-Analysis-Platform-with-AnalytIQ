@@ -11,11 +11,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include the correct Plotly.js library -->
     <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
-
-    <!-- Custom CSS to improve tab visibility -->
-    <style>
-        /* ... (same CSS styles as before) ... */
-    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -35,12 +30,22 @@
 
         <!-- Tabs for different sections -->
         <ul class="nav nav-tabs mt-4" id="analysisTabs" role="tablist">
-            <!-- ... (tab navigation items) ... -->
+            <li class="nav-item">
+                <a class="nav-link active" id="commentary-tab" data-toggle="tab" href="#commentary" role="tab">Commentary</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="visualization-tab" data-toggle="tab" href="#visualization" role="tab">Visualization</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="details-tab" data-toggle="tab" href="#details" role="tab">Analysis Details</a>
+            </li>
         </ul>
 
         <!-- Tab Content -->
         <div class="tab-content" id="analysisTabsContent">
-            <!-- ... (other tab panes) ... -->
+            <div class="tab-pane fade show active" id="commentary" role="tabpanel">
+                <p class="mt-3">{{ commentary }}</p>
+            </div>
 
             <div class="tab-pane fade" id="visualization" role="tabpanel">
                 {% if graphJSON %}
@@ -68,7 +73,7 @@
                                         <th>{{ col }}</th>
                                     {% endfor %}
                                 </tr>
-                                {% set stats = analysis.descriptive_statistics.values() | first | keys() %}
+                                {% set stats = (analysis.descriptive_statistics.values() | first).keys %}
                                 {% for stat in stats %}
                                 <tr>
                                     <td>{{ stat }}</td>
