@@ -3,6 +3,8 @@
 import pandas as pd
 import plotly.express as px
 import logging
+import json
+from plotly.utils import PlotlyJSONEncoder
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -12,14 +14,10 @@ class DataProcessingAgent:
     """
     Agent responsible for cleaning and preprocessing the dataset.
     """
-    def process(self, dataset_path):
+    def process(self, df):
         try:
-            # Load dataset
-            df = pd.read_csv(dataset_path)
-            logger.info("Dataset loaded successfully.")
-
             # Data Cleaning Steps (Example)
-            df.dropna(inplace=True)  # Remove missing values
+            df = df.dropna()  # Remove missing values
             logger.info("Missing values removed.")
 
             # Additional preprocessing can be added here
@@ -35,7 +33,7 @@ class AnalysisAgent:
     def analyze(self, df, analysis_params):
         try:
             analysis_results = {}
-            
+
             # Example Analysis: Descriptive Statistics
             if analysis_params.get("descriptive_statistics", False):
                 analysis_results["descriptive_statistics"] = df.describe().to_dict()
@@ -43,7 +41,7 @@ class AnalysisAgent:
 
             # Example Analysis: Correlation Matrix
             if analysis_params.get("correlation_matrix", False):
-                # Select only numeric columns to avoid FutureWarning
+                # Select only numeric columns to avoid issues
                 numeric_df = df.select_dtypes(include='number')
                 correlation = numeric_df.corr()
                 analysis_results["correlation_matrix"] = correlation.to_dict()
@@ -61,44 +59,53 @@ class VisualizationAgent:
     """
     def visualize(self, df, analysis_results, styling_params):
         try:
+            # Initialize empty figure
+            fig = None
+            commentary = ""
+
             # Example Visualization: Bar Chart of Mean Values
             if "descriptive_statistics" in analysis_results:
                 desc_stats = analysis_results["descriptive_statistics"]
-                categories = list(desc_stats.keys())
-                means = [desc_stats[cat]["mean"] for cat in categories]
+                # Get the mean values from descriptive statistics
+                means = {col: stats['mean'] for col, stats in desc_stats.items()}
+                categories = list(means.keys())
+                mean_values = list(means.values())
 
-                fig_bar = px.bar(
+                fig = px.bar(
                     x=categories,
-                    y=means,
-                    title='Mean Values of Categories',
-                    labels={'x': 'Category', 'y': 'Mean Value'}
+                    y=mean_values,
+                    title='Mean Values of Numerical Columns',
+                    labels={'x': 'Columns', 'y': 'Mean Value'}
                 )
-                fig_bar.update_layout(title_font_size=24)
+                fig.update_layout(title_font_size=24)
 
-                commentary = "Generated a bar chart showcasing the mean values of each category."
-
-                return fig_bar, commentary  # Return the figure object and commentary
+                commentary = "Generated a bar chart showcasing the mean values of each numerical column."
 
             # Example Visualization: Heatmap of Correlation Matrix
             elif "correlation_matrix" in analysis_results:
                 correlation = analysis_results["correlation_matrix"]
                 df_corr = pd.DataFrame(correlation)
 
-                fig_heatmap = px.imshow(
+                fig = px.imshow(
                     df_corr,
                     text_auto=True,
                     title='Correlation Matrix',
                     labels=dict(x="Variables", y="Variables", color="Correlation Coefficient")
                 )
-                fig_heatmap.update_layout(title_font_size=24)
+                fig.update_layout(title_font_size=24)
 
                 commentary = "Generated a heatmap displaying the correlation matrix of the dataset."
 
-                return fig_heatmap, commentary  # Return the figure object and commentary
-
             else:
                 commentary = "No visualizations generated based on the analysis results."
-                return None, commentary
+
+            if fig is not None:
+                # Serialize figure to JSON
+                graphJSON = json.dumps(fig, cls=PlotlyJSONEncoder)
+            else:
+                graphJSON = None
+
+            return graphJSON, commentary
         except Exception as e:
             logger.error(f"Error in VisualizationAgent: {e}")
             raise e
