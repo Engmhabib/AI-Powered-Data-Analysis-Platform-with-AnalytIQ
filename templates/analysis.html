@@ -1,22 +1,15 @@
-<!-- templates/analysis.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analysis Results</title>
-    
     <!-- Include Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Include Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    
-    <!-- Include the correct Plotly.js library -->
+    <!-- Include Plotly.js library -->
     <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
 </head>
 <body>
@@ -99,7 +92,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% set stats = (analysis.descriptive_statistics.values() | first).keys() %}
+                                    {% set stats = (analysis.descriptive_statistics.values() | list)[0].keys() %}
                                     {% for stat in stats %}
                                     <tr>
                                         <td>{{ stat }}</td>
@@ -207,6 +200,39 @@
                         {% endfor %}
                     {% else %}
                         <p>No value counts available.</p>
+                    {% endif %}
+
+                    <!-- Clustering Analysis -->
+                    {% if analysis.clustering_analysis %}
+                        <h3 class="mt-5">Clustering Analysis</h3>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Cluster</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cluster, count in analysis.clustering_analysis.items() %}
+                                    <tr>
+                                        <td>{{ cluster }}</td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No clustering analysis available.</p>
+                    {% endif %}
+
+                    <!-- Time Series Analysis -->
+                    {% if analysis.time_series_analysis %}
+                        <h3 class="mt-5">Time Series Analysis</h3>
+                        <p>Time series analysis results are available in the visualization tab.</p>
+                    {% else %}
+                        <p>No time series analysis available.</p>
                     {% endif %}
                 </div>
             </div>
