@@ -21,6 +21,10 @@ class DataProcessingAgent:
             logger.info("Missing values removed.")
 
             # Additional preprocessing can be added here
+            # For example:
+            # - Handling duplicate entries
+            # - Encoding categorical variables
+            # - Scaling numerical features
             return df
         except Exception as e:
             logger.error(f"Error in DataProcessingAgent: {e}")
@@ -34,20 +38,32 @@ class AnalysisAgent:
         try:
             analysis_results = {}
 
-            # Example Analysis: Descriptive Statistics
+            # Descriptive Statistics
             if analysis_params.get("descriptive_statistics", False):
-                analysis_results["descriptive_statistics"] = df.describe().to_dict()
+                descriptive_stats = df.describe(include='all').to_dict()
+                analysis_results["descriptive_statistics"] = descriptive_stats
                 logger.info("Descriptive statistics generated.")
 
-            # Example Analysis: Correlation Matrix
+            # Correlation Matrix
             if analysis_params.get("correlation_matrix", False):
-                # Select only numeric columns to avoid issues
                 numeric_df = df.select_dtypes(include='number')
                 correlation = numeric_df.corr()
                 analysis_results["correlation_matrix"] = correlation.to_dict()
                 logger.info("Correlation matrix generated.")
 
-            # Additional analyses can be added based on analysis_params
+            # Missing Values Analysis
+            if analysis_params.get("missing_values", False):
+                missing_values = df.isnull().sum().to_dict()
+                analysis_results["missing_values"] = missing_values
+                logger.info("Missing values analysis completed.")
+
+            # Value Counts for Categorical Variables
+            if analysis_params.get("value_counts", False):
+                categorical_cols = df.select_dtypes(include='object').columns
+                value_counts = {col: df[col].value_counts().to_dict() for col in categorical_cols}
+                analysis_results["value_counts"] = value_counts
+                logger.info("Value counts for categorical variables generated.")
+
             return analysis_results
         except Exception as e:
             logger.error(f"Error in AnalysisAgent: {e}")
@@ -63,25 +79,28 @@ class VisualizationAgent:
             fig = None
             commentary = ""
 
-            # Example Visualization: Bar Chart of Mean Values
+            # Visualization based on Descriptive Statistics
             if "descriptive_statistics" in analysis_results:
                 desc_stats = analysis_results["descriptive_statistics"]
                 # Get the mean values from descriptive statistics
-                means = {col: stats['mean'] for col, stats in desc_stats.items()}
+                means = {col: stats['mean'] for col, stats in desc_stats.items() if 'mean' in stats and isinstance(stats['mean'], (int, float))}
                 categories = list(means.keys())
                 mean_values = list(means.values())
 
-                fig = px.bar(
-                    x=categories,
-                    y=mean_values,
-                    title='Mean Values of Numerical Columns',
-                    labels={'x': 'Columns', 'y': 'Mean Value'}
-                )
-                fig.update_layout(title_font_size=24)
+                if mean_values:
+                    fig = px.bar(
+                        x=categories,
+                        y=mean_values,
+                        title='Mean Values of Numerical Columns',
+                        labels={'x': 'Columns', 'y': 'Mean Value'}
+                    )
+                    fig.update_layout(title_font_size=24)
 
-                commentary = "Generated a bar chart showcasing the mean values of each numerical column."
+                    commentary = "Generated a bar chart showcasing the mean values of each numerical column."
+                else:
+                    commentary = "No numerical columns with mean values found for visualization."
 
-            # Example Visualization: Heatmap of Correlation Matrix
+            # Visualization based on Correlation Matrix
             elif "correlation_matrix" in analysis_results:
                 correlation = analysis_results["correlation_matrix"]
                 df_corr = pd.DataFrame(correlation)
