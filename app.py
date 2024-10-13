@@ -5,7 +5,9 @@ import pandas as pd
 from agents import DataProcessingAgent, PreprocessingAgent, AnalysisAgent, VisualizationAgent
 import openai
 import json
-import re  # Import re module for regex
+import re
+import time
+from typing import Tuple, Dict
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_EXTENSIONS = {'csv'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
-def allowed_file(filename):
+def allowed_file(filename: str) -> bool:
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -37,53 +39,91 @@ visualization_agent = VisualizationAgent()
 # Load your OpenAI API key from an environment variable
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
-def interpret_query(user_query):
-    # Use OpenAI API to interpret the query using ChatCompletion
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are an assistant that helps determine which analyses to perform based on a user's query and provides insights. "
-                    "First, provide the analyses as a JSON object enclosed in triple backticks, like ```{...}```. "
-                    "Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts, "
-                    "time_series_analysis, clustering_analysis. "
-                    "Then, provide a brief natural language explanation of the insights you can offer based on the user's query."
-                )
-            },
-            {"role": "user", "content": user_query}
-        ],
-        max_tokens=750,
-       
-    )
+# Define valid analysis keys
+VALID_ANALYSIS_KEYS = {
+    "descriptive_statistics",
+    "correlation_matrix",
+    "missing_values",
+    "value_counts",
+    "time_series_analysis",
+    "clustering_analysis"
+}
 
+def interpret_query(user_query: str) -> Tuple[Dict[str, bool], str]:
+    """
+    Uses OpenAI's ChatCompletion API to interpret the user's natural language query
+    and determine which data analyses to perform.
+    
+    Args:
+        user_query (str): The natural language query from the user.
+    
+    Returns:
+        Tuple[Dict[str, bool], str]: A dictionary of analysis parameters and the AI's explanation.
+    """
+    # Define the system prompt with JSON specification
+    system_content = (
+        "You are an assistant that helps determine which analyses to perform based on a user's query and provides insights. "
+        "First, provide the analyses as a JSON object labeled with 'json' and enclosed in triple backticks, like ```json\n{...}\n```. "
+        "Ensure the JSON only includes the following keys with boolean values: descriptive_statistics, correlation_matrix, missing_values, value_counts, "
+        "time_series_analysis, clustering_analysis. "
+        "After the JSON, provide a brief natural language explanation of the insights you can offer based on the user's query."
+    )
+    
     # Default analysis parameters
-    analysis_params = {
-        "descriptive_statistics": False,
-        "correlation_matrix": False,
-        "missing_values": False,
-        "value_counts": False,
-        "time_series_analysis": False,
-        "clustering_analysis": False
-    }
+    analysis_params = {key: False for key in VALID_ANALYSIS_KEYS}
+    openai_response_text = ""
+    
+    retries = 3
+    backoff_factor = 2
+
+    for attempt in range(retries):
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",  # Updated model
+                messages=[
+                    {"role": "system", "content": system_content},
+                    {"role": "user", "content": user_query}
+                ],
+                max_tokens=750,
+                temperature=0.3,  # Lowered temperature for deterministic responses
+            )
+            break  # Exit the retry loop if successful
+        except openai.error.RateLimitError:
+            logger.warning(f"Rate limit exceeded. Retrying in {backoff_factor ** attempt} seconds...")
+            time.sleep(backoff_factor ** attempt)
+        except openai.error.OpenAIError as e:
+            logger.error(f"OpenAI API error: {e}")
+            flash('An error occurred while processing your request. Please try again later.', 'danger')
+            return analysis_params, "Error processing your query. Default analysis will be performed."
+    else:
+        # All retries failed
+        flash('The service is currently unavailable. Please try again later.', 'danger')
+        return analysis_params, "Service is currently unavailable."
 
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
 
-        # Extract JSON object enclosed in triple backticks
-        match = re.search(r'```(.*?)```', ai_response, re.DOTALL)
+        # Extract JSON object labeled with 'json' enclosed in triple backticks
+        match = re.search(r'```json\s*\n?(\{.*?\})\n?```', ai_response, re.DOTALL)
         if match:
             json_str = match.group(1).strip()
             parsed_response = json.loads(json_str)
-            # Update analysis parameters
-            analysis_params.update(parsed_response)
+            logger.info(f"Parsed JSON from AI: {parsed_response}")
+
+            # Update analysis parameters with validated keys and boolean values
+            for key in VALID_ANALYSIS_KEYS:
+                if key in parsed_response and isinstance(parsed_response[key], bool):
+                    analysis_params[key] = parsed_response[key]
+                else:
+                    logger.warning(f"Missing or invalid key '{key}' in AI response.")
+
             # Remove JSON part to get the explanation
-            explanation = ai_response.replace(f'```{json_str}```', '').strip()
+            explanation = ai_response.replace(match.group(0), '').strip()
             openai_response_text = explanation
         else:
-            # If no JSON found, default to descriptive statistics
+            # If no valid JSON found, default to descriptive statistics
+            logger.warning("No valid JSON found in AI response.")
             analysis_params["descriptive_statistics"] = True
             openai_response_text = ai_response  # Treat entire response as explanation
 
@@ -91,7 +131,7 @@ def interpret_query(user_query):
         logger.error(f"JSON Decode Error interpreting AI response: {e}")
         flash('There was an issue interpreting your query. Default analysis will be performed.', 'warning')
         analysis_params["descriptive_statistics"] = True
-        openai_response_text = ai_response  # Use AI response as explanation
+        openai_response_text = "There was an issue interpreting your query. Default analysis will be performed."
     except Exception as e:
         logger.error(f"Error interpreting AI response: {e}")
         flash('Error processing your query. Please try again.', 'danger')
@@ -100,13 +140,19 @@ def interpret_query(user_query):
 
     return analysis_params, openai_response_text
 
-def perform_analysis(data):
+def perform_analysis(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
     """
     Perform the entire analysis workflow:
     1. Data Processing
     2. Preprocessing
     3. Data Analysis
     4. Data Visualization
+    
+    Args:
+        data (Dict[str, Any]): A dictionary containing dataframe, analysis parameters, styling parameters, and OpenAI response text.
+    
+    Returns:
+        Tuple[Dict[str, Any], int]: A dictionary with analysis results and an HTTP status code.
     """
     df = data.get("dataframe")
     analysis_params = data.get("analysis_params", {})
@@ -114,26 +160,33 @@ def perform_analysis(data):
     openai_response_text = data.get("openai_response_text", "No OpenAI query provided.")
 
     if df is None:
+        logger.error("No dataset provided.")
         return {"error": "No dataset provided."}, 400
 
     # Step 1: Data Processing
     try:
+        logger.info("Starting data processing.")
         processed_data = data_processing_agent.process(df)
         processed_data = preprocessing_agent.preprocess(processed_data)
+        logger.info("Data processing completed successfully.")
     except Exception as e:
         logger.error(f"DataProcessingAgent failed: {e}")
         return {"error": "Data processing failed."}, 500
 
     # Step 2: Data Analysis
     try:
+        logger.info("Starting data analysis.")
         analysis_results = analysis_agent.analyze(processed_data, analysis_params)
+        logger.info("Data analysis completed successfully.")
     except Exception as e:
         logger.error(f"AnalysisAgent failed: {e}")
         return {"error": "Data analysis failed."}, 500
 
     # Step 3: Data Visualization
     try:
+        logger.info("Starting data visualization.")
         graphJSON, commentary = visualization_agent.visualize(processed_data, analysis_results, styling_params)
+        logger.info("Data visualization completed successfully.")
     except Exception as e:
         logger.error(f"VisualizationAgent failed: {e}")
         return {"error": "Data visualization failed."}, 500
@@ -175,12 +228,11 @@ def index():
             # Read the uploaded file directly into a DataFrame
             try:
                 df = pd.read_csv(file)
+                logger.info("Dataset uploaded and read successfully.")
             except Exception as e:
                 logger.error(f"Failed to read CSV file: {e}")
                 flash('Failed to read CSV file. Please ensure it is a valid CSV.', 'danger')
                 return redirect(request.url)
-
-            logger.info("Dataset uploaded and read successfully.")
 
             user_query = request.form.get('user_query', '').strip()
 
@@ -190,12 +242,8 @@ def index():
             else:
                 # Get analysis parameters from the form
                 analysis_params = {
-                    "descriptive_statistics": 'descriptive_statistics' in request.form,
-                    "correlation_matrix": 'correlation_matrix' in request.form,
-                    "missing_values": 'missing_values' in request.form,
-                    "value_counts": 'value_counts' in request.form,
-                    "time_series_analysis": 'time_series_analysis' in request.form,
-                    "clustering_analysis": 'clustering_analysis' in request.form
+                    key: key in request.form
+                    for key in VALID_ANALYSIS_KEYS
                 }
                 openai_response_text = "No query was provided."
 
