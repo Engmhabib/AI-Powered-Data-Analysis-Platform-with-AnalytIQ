@@ -1,11 +1,30 @@
+<!-- templates/analysis.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Existing head content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    
+    <!-- Include Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- Include the correct Plotly.js library -->
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
 </head>
 <body>
     <div class="container mt-5">
-        <!-- Existing content -->
+        <div class="text-center mb-5">
+            <h1 class="mb-3">Analysis Results</h1>
+            <p class="lead">Here are the insights from your data.</p>
+        </div>
 
         <!-- Show OpenAI query result -->
         {% if openai_response_text %}
@@ -20,57 +39,187 @@
         {% endif %}
 
         <!-- Tabs for different sections -->
-        <!-- Existing tab structure -->
+        <ul class="nav nav-tabs mt-4" id="analysisTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="commentary-tab" data-bs-toggle="tab" data-bs-target="#commentary" type="button" role="tab">
+                    Commentary
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="visualization-tab" data-bs-toggle="tab" data-bs-target="#visualization" type="button" role="tab">
+                    Visualization
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                    Analysis Details
+                </button>
+            </li>
+        </ul>
 
         <!-- Tab Content -->
         <div class="tab-content" id="analysisTabsContent">
-            <!-- Existing tab panes -->
+            <div class="tab-pane fade show active" id="commentary" role="tabpanel">
+                <div class="mt-4">
+                    <p>{{ commentary }}</p>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="visualization" role="tabpanel">
+                {% if graphJSON %}
+                    <div id="plotly-div" class="mt-4"></div>
+                    <script type="text/javascript">
+                        try {
+                            var graphData = JSON.parse(`{{ graphJSON | safe }}`);
+                            Plotly.newPlot('plotly-div', graphData.data, graphData.layout);
+                        } catch (e) {
+                            console.error("Error parsing graphJSON:", e);
+                            document.getElementById('plotly-div').innerHTML = "<p>Error displaying visualization.</p>";
+                        }
+                    </script>
+                {% else %}
+                    <p class="mt-4">No visualization available.</p>
+                {% endif %}
+            </div>
 
             <div class="tab-pane fade" id="details" role="tabpanel">
                 <!-- Analysis Details Section -->
                 <div class="analysis-details mt-4">
-                    <!-- Existing analysis details -->
-
-                    <!-- Clustering Analysis -->
-                    {% if analysis.clustering_analysis %}
-                        <h3 class="mt-5">Clustering Analysis</h3>
+                    <!-- Descriptive Statistics -->
+                    {% if analysis.descriptive_statistics %}
+                        <h3>Descriptive Statistics</h3>
                         <div class="table-responsive mt-3">
                             <table class="table table-bordered table-striped">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>Cluster</th>
-                                        <th>Count</th>
+                                        <th>Statistic</th>
+                                        {% for col in analysis.descriptive_statistics.keys() %}
+                                            <th>{{ col }}</th>
+                                        {% endfor %}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for cluster, count in analysis.clustering_analysis.items() %}
+                                    {% set stats = (analysis.descriptive_statistics.values() | first).keys() %}
+                                    {% for stat in stats %}
                                     <tr>
-                                        <td>{{ cluster }}</td>
-                                        <td>{{ count }}</td>
+                                        <td>{{ stat }}</td>
+                                        {% for col in analysis.descriptive_statistics.keys() %}
+                                            <td>
+                                                {% if analysis.descriptive_statistics[col][stat] | is_number %}
+                                                    {{ analysis.descriptive_statistics[col][stat] | round(2) }}
+                                                {% else %}
+                                                    {{ analysis.descriptive_statistics[col][stat] }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <p>No clustering analysis available.</p>
+                        <p>No descriptive statistics available.</p>
                     {% endif %}
 
-                    <!-- Time Series Analysis -->
-                    {% if analysis.time_series_analysis %}
-                        <h3 class="mt-5">Time Series Analysis</h3>
-                        <p>Time series analysis results are available in the visualization tab.</p>
+                    <!-- Correlation Matrix -->
+                    {% if analysis.correlation_matrix %}
+                        <h3 class="mt-5">Correlation Matrix</h3>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th></th>
+                                        {% for col in analysis.correlation_matrix.keys() %}
+                                            <th>{{ col }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row_key, row_values in analysis.correlation_matrix.items() %}
+                                    <tr>
+                                        <td>{{ row_key }}</td>
+                                        {% for col_key in analysis.correlation_matrix.keys() %}
+                                            <td>
+                                                {% if row_values[col_key] | is_number %}
+                                                    {{ row_values[col_key] | round(2) }}
+                                                {% else %}
+                                                    {{ row_values[col_key] }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     {% else %}
-                        <p>No time series analysis available.</p>
+                        <p>No correlation matrix available.</p>
+                    {% endif %}
+
+                    <!-- Missing Values Analysis -->
+                    {% if analysis.missing_values %}
+                        <h3 class="mt-5">Missing Values</h3>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Column</th>
+                                        <th>Missing Values</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for col, missing in analysis.missing_values.items() %}
+                                    <tr>
+                                        <td>{{ col }}</td>
+                                        <td>{{ missing }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No missing values analysis available.</p>
+                    {% endif %}
+
+                    <!-- Value Counts for Categorical Variables -->
+                    {% if analysis.value_counts %}
+                        <h3 class="mt-5">Value Counts for Categorical Variables</h3>
+                        {% for col, counts in analysis.value_counts.items() %}
+                            <h4 class="mt-4">{{ col }}</h4>
+                            <div class="table-responsive mt-3">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Value</th>
+                                            <th>Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for value, count in counts.items() %}
+                                        <tr>
+                                            <td>{{ value }}</td>
+                                            <td>{{ count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No value counts available.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Existing content -->
+        <div class="text-center mt-5">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-redo me-2"></i> Perform Another Analysis
+            </a>
+        </div>
     </div>
 
     <!-- Include Bootstrap 5 JS and dependencies -->
-    <!-- Existing scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
