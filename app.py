@@ -16,10 +16,16 @@ logger = logging.getLogger(__name__)
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'csv'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Custom Jinja2 filter to check if a value is numeric
+@app.template_filter('is_number')
+def is_number(value):
+    return isinstance(value, (int, float))
 
 # Initialize agents
 data_processing_agent = DataProcessingAgent()
@@ -35,24 +41,28 @@ def interpret_query(user_query):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are an assistant that determines which analyses to perform based on a user's query. Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts. Provide the options as a JSON object with keys as options and values as true or false."},
+            {"role": "system", "content": "You are an assistant that determines which analyses to perform based on a user's query. Options are: descriptive_statistics, correlation_matrix, missing_values, value_counts. Provide the options as a JSON object with keys as options and values as true or false. For example: {'descriptive_statistics': true, 'correlation_matrix': false, ...}"},
             {"role": "user", "content": user_query}
         ],
         max_tokens=150,
         temperature=0
     )
-    
+
+    # Default analysis parameters
     analysis_params = {
         "descriptive_statistics": False,
         "correlation_matrix": False,
         "missing_values": False,
         "value_counts": False
     }
-    
+
     try:
         ai_response = response['choices'][0]['message']['content'].strip()
         logger.info(f"AI Response: {ai_response}")
-        analysis_params.update(json.loads(ai_response))
+        # Parse the AI response
+        parsed_response = json.loads(ai_response.lower())
+        # Update analysis parameters
+        analysis_params.update(parsed_response)
     except json.JSONDecodeError as e:
         logger.error(f"JSON Decode Error interpreting AI response: {e}")
         flash('There was an issue interpreting your query. Default analysis will be performed.', 'warning')
@@ -62,8 +72,8 @@ def interpret_query(user_query):
         logger.error(f"Error interpreting AI response: {e}")
         flash('Error processing your query. Please try again.', 'danger')
         analysis_params["descriptive_statistics"] = True
-        ai_response = "Error processing your query. Please try again."
-        
+        ai_response = "Error processing your query. Default analysis will be performed."
+
     return analysis_params, ai_response
 
 def perform_analysis(data):
@@ -130,6 +140,14 @@ def index():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
+            # Validate file size
+            file.seek(0, os.SEEK_END)
+            file_length = file.tell()
+            if file_length > MAX_FILE_SIZE:
+                flash('File size exceeds the limit of 10 MB.', 'danger')
+                return redirect(request.url)
+            file.seek(0)  # Reset file pointer after checking size
+
             # Read the uploaded file directly into a DataFrame
             try:
                 df = pd.read_csv(file)
@@ -140,7 +158,7 @@ def index():
 
             logger.info("Dataset uploaded and read successfully.")
 
-            user_query = request.form.get('user_query', '')
+            user_query = request.form.get('user_query', '').strip()
 
             if user_query:
                 # Interpret the user's natural language query
@@ -173,10 +191,10 @@ def index():
                 commentary = result.get("commentary", "")
                 graphJSON = result.get("graphJSON", None)
                 openai_response_text = result.get("openai_response_text", "No response from OpenAI.")
-                return render_template('analysis.html', 
-                                       analysis=analysis, 
-                                       commentary=commentary, 
-                                       graphJSON=graphJSON, 
+                return render_template('analysis.html',
+                                       analysis=analysis,
+                                       commentary=commentary,
+                                       graphJSON=graphJSON,
                                        openai_response_text=openai_response_text)
             else:
                 flash(result.get("error", "An error occurred while processing your request."), 'danger')
