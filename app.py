@@ -4,7 +4,8 @@ import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, flash
 import pandas as pd
-from agents import DataProcessingAgent, AnalysisAgent, VisualizationAgent
+from agents import DataProcessingAgent, PreprocessingAgent, AnalysisAgent, VisualizationAgent
+import openai
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -23,15 +24,49 @@ def allowed_file(filename):
 
 # Initialize agents
 data_processing_agent = DataProcessingAgent()
+preprocessing_agent = PreprocessingAgent()
 analysis_agent = AnalysisAgent()
 visualization_agent = VisualizationAgent()
+
+# Load your OpenAI API key from an environment variable or secret management service
+openai.api_key = os.environ.get('OPENAI_API_KEY')
+
+def interpret_query(user_query):
+    # Use OpenAI API to interpret the query
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=f"Analyze the following query and determine which analysis to perform: '{user_query}'\nOptions: descriptive_statistics, correlation_matrix, missing_values, value_counts\nProvide the options as a JSON object with keys as options and values as true or false.",
+        max_tokens=150,
+        n=1,
+        stop=None,
+        temperature=0
+    )
+    # Extract the analysis parameters from the response
+    analysis_params = {
+        "descriptive_statistics": False,
+        "correlation_matrix": False,
+        "missing_values": False,
+        "value_counts": False
+    }
+    try:
+        ai_response = response.choices[0].text.strip()
+        logger.info(f"AI Response: {ai_response}")
+        # Assuming the AI response is a JSON-like string
+        import json
+        analysis_params.update(json.loads(ai_response))
+    except Exception as e:
+        logger.error(f"Error interpreting AI response: {e}")
+        # Default to descriptive statistics if AI response is invalid
+        analysis_params["descriptive_statistics"] = True
+    return analysis_params
 
 def perform_analysis(data):
     """
     Perform the entire analysis workflow:
     1. Data Processing
-    2. Data Analysis
-    3. Data Visualization
+    2. Preprocessing
+    3. Data Analysis
+    4. Data Visualization
     """
     df = data.get("dataframe")
     analysis_params = data.get("analysis_params", {})
@@ -43,6 +78,7 @@ def perform_analysis(data):
     # Step 1: Data Processing
     try:
         processed_data = data_processing_agent.process(df)
+        processed_data = preprocessing_agent.preprocess(processed_data)
     except Exception as e:
         logger.error(f"DataProcessingAgent failed: {e}")
         return {"error": "Data processing failed."}, 500
@@ -96,14 +132,19 @@ def index():
 
             logger.info("Dataset uploaded and read successfully.")
 
-            # Get analysis parameters from the form
-            analysis_params = {
-                "descriptive_statistics": 'descriptive_statistics' in request.form,
-                "correlation_matrix": 'correlation_matrix' in request.form,
-                "missing_values": 'missing_values' in request.form,
-                "value_counts": 'value_counts' in request.form
-                # Add more parameters as needed
-            }
+            user_query = request.form.get('user_query', '')
+
+            if user_query:
+                # Interpret the user's natural language query
+                analysis_params = interpret_query(user_query)
+            else:
+                # Get analysis parameters from the form
+                analysis_params = {
+                    "descriptive_statistics": 'descriptive_statistics' in request.form,
+                    "correlation_matrix": 'correlation_matrix' in request.form,
+                    "missing_values": 'missing_values' in request.form,
+                    "value_counts": 'value_counts' in request.form
+                }
 
             # Get styling parameters
             styling_params = request.form.get('styling_params', 'Default styling.')
