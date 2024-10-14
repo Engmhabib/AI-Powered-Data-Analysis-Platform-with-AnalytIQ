@@ -11,6 +11,114 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Chatbot styles -->
+    <style>
+        /* Styles for the floating chatbot button */
+        #chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: transparent;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: none;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100px;
+        }
+
+        #chatbot-toggle img {
+            height: 40px;
+            width: 40px;
+        }
+
+        #chatbox {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-width: 90%;
+            max-height: 500px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #chatbox.show {
+            display: block;
+            opacity: 1;
+        }
+
+        #chatbox header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #chatbox header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+        }
+
+        #chatbox .content {
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: scroll;
+        }
+
+        #chatbox footer {
+            display: flex;
+            padding: 10px;
+            align-items: center;
+        }
+
+        #chatbox input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #chatbox footer button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        #chatbox footer button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -83,27 +191,77 @@
         </div>
     </div>
 
+    <!-- Chatbot Integration -->
+    <button id="chatbot-toggle" aria-label="Toggle chat with FazBot">
+        <span>Hi! I am AnalytIQ</span>
+        <img src="{{ url_for('static', filename='fb.png') }}" alt="FazBot Logo">
+    </button>
+
+    <div id="chatbox">
+        <header>
+            <img src="{{ url_for('static', filename='fb.png') }}" alt="FazBot Logo">
+            AnalytIQ
+            <button id="minimize-chatbox" aria-label="Minimize chatbox">&minus;</button>
+        </header>
+        <div class="content"></div>
+        <footer>
+            <input type="text" id="user-input" placeholder="Type your message here...">
+            <button id="get-answer">Send</button>
+        </footer>
+    </div>
+
     <!-- Include Bootstrap 5 JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Add JavaScript to handle file validation and empty fields -->
+
+    <!-- Chatbot JavaScript -->
     <script>
-        // Validate file size (max 10MB)
-        document.getElementById('dataset').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file && file.size > 10 * 1024 * 1024) {  // 10 MB limit
-                alert('File size exceeds 10 MB. Please upload a smaller file.');
-                this.value = '';  // Clear the file input
-            }
+        // Show the chatbox when the toggle button is clicked
+        document.getElementById('chatbot-toggle').addEventListener('click', function() {
+            var chatbox = document.getElementById('chatbox');
+            chatbox.style.display = 'block';
+            setTimeout(() => chatbox.classList.add('show'), 50);
+            this.style.display = 'none';
         });
 
-        // Ensure that a file is selected before submission
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(event) {
-            const fileInput = document.getElementById('dataset');
-            if (!fileInput.files.length) {
-                alert('Please upload a CSV file to proceed.');
-                event.preventDefault();  // Prevent form submission
+        // Minimize the chatbox and show the toggle button again
+        document.getElementById('minimize-chatbox').addEventListener('click', function() {
+            var chatbox = document.getElementById('chatbox');
+            var chatbotToggle = document.getElementById('chatbot-toggle');
+            chatbox.classList.remove('show');
+            setTimeout(() => {
+                chatbox.style.display = 'none';
+                chatbotToggle.style.display = 'block';
+            }, 300);
+        });
+
+        // Chatbox functionality (add your chatbot logic here)
+        document.getElementById('get-answer').addEventListener('click', function() {
+            var userInput = document.getElementById('user-input').value;
+            var contentDiv = document.querySelector('#chatbox .content');
+
+            if (!userInput.trim()) {
+                alert("Please enter a message.");
+                return;
             }
+
+            var userMessage = document.createElement('div');
+            userMessage.textContent = userInput;
+            userMessage.classList.add('message', 'user-message');
+            contentDiv.appendChild(userMessage);
+
+            // Clear input
+            document.getElementById('user-input').value = '';
+
+            // Simulate a bot response (replace this with your chatbot API call)
+            setTimeout(() => {
+                var botMessage = document.createElement('div');
+                botMessage.textContent = "This is a sample response from the bot.";
+                botMessage.classList.add('message', 'bot-message');
+                contentDiv.appendChild(botMessage);
+
+                // Scroll to the bottom of the chatbox
+                contentDiv.scrollTop = contentDiv.scrollHeight;
+            }, 1000);
         });
     </script>
 </body>
