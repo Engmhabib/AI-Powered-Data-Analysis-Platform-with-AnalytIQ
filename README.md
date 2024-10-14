@@ -2,7 +2,7 @@
 
 # Data Analysis Web Application
 
-A Flask-based web application that allows users to upload CSV datasets, perform statistical analyses, and visualize results. The app integrates AI capabilities to interpret natural language queries using OpenAI's GPT-3.5-turbo model.
+A Flask-based web application that allows users to upload CSV datasets, perform statistical analyses, and visualize results. The app integrates AI capabilities to interpret natural language queries using OpenAI's GPT-4 model.
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ A Flask-based web application that allows users to upload CSV datasets, perform 
 
 - **Data Upload:** Users can upload CSV files up to 10 MB.
 - **Analysis Parameters:** Choose from predefined analysis options or input a natural language query.
-- **AI Query Interpretation:** Utilizes OpenAI's GPT-3.5-turbo model to interpret user queries and determine analysis parameters.
+- **AI Query Interpretation:** Utilizes OpenAI's GPT-4 model to interpret user queries and determine analysis parameters.
 - **Data Processing:** Automated data cleaning and preprocessing.
 - **Statistical Analysis:** Generates descriptive statistics, correlation matrices, missing values analysis, and value counts.
 - **Data Visualization:** Creates interactive Plotly graphs based on analysis results.
