@@ -35,38 +35,6 @@ These agents are designed to modularize the steps involved in data analysis, mak
   - Computes the correlation matrix.
   - Analyzes missing values.
   - Counts values for categorical variables.
-- **Considered AI or Automation?** The analyses performed are statistical computations using pandas and numpy libraries. They do not involve AI algorithms. Hence, this agent is also considered **automation**.
-
-### 4. **VisualizationAgent**
-
-- **Purpose:** Creates visual representations of the analysis results.
-- **Functions:**
-  - Generates bar charts, heatmaps, or scatter plots based on the analysis results.
-  - Provides commentary on the generated visualizations.
-- **Considered AI or Automation?** The visualizations are created using Plotly, based on predefined logic and the data provided. No AI techniques are used. Therefore, this agent is considered **automation**.
-
-### **Integration with AI:**
-
-The AI component in your application resides in the `interpret_query` function within `app.py`. This function uses OpenAI's GPT-3.5-turbo model to interpret the user's natural language query and map it to specific analysis parameters.
-
-- **Functionality:**
-  - Accepts a natural language query from the user.
-  - Sends the query to the OpenAI API for interpretation.
-  - Parses the AI's response to determine which analyses to perform.
-- **Considered AI or Automation?** This function leverages AI (specifically NLP capabilities of GPT-3.5-turbo) to understand and process human language. Therefore, this component is considered **AI**.
-
-**Summary:**
-
-- The agents (`DataProcessingAgent`, `PreprocessingAgent`, `AnalysisAgent`, `VisualizationAgent`) are part of the application's automation framework, handling data processing tasks through programmed logic.
-- The use of OpenAI's API for query interpretation introduces AI capabilities into the application, enabling it to understand and process natural language inputs.
-
----
-
-**README File for GitHub Repository:**
-
-Below is a comprehensive `README.md` file for your GitHub repository:
-
----
 
 # Data Analysis Web Application
 
@@ -99,7 +67,6 @@ A Flask-based web application that allows users to upload CSV datasets, perform 
 
 ![Demo Screenshot](demo_screenshot.png)
 
-*Note: Replace `demo_screenshot.png` with an actual screenshot of your application.*
 
 ## Installation
 
