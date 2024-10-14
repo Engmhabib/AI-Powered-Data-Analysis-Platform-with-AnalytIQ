@@ -1,40 +1,4 @@
-**Explanation of the Agents:**
 
-In your Flask application, you have structured the data analysis workflow using four distinct agents:
-
-1. **DataProcessingAgent**
-2. **PreprocessingAgent**
-3. **AnalysisAgent**
-4. **VisualizationAgent**
-
-These agents are designed to modularize the steps involved in data analysis, making the code more organized, maintainable, and scalable.
-
-### 1. **DataProcessingAgent**
-
-- **Purpose:** Responsible for initial data cleaning tasks.
-- **Functions:**
-  - Removes duplicate rows from the dataset.
-  - Logs the status of the dataset after cleaning.
-- **Considered AI or Automation?** This agent performs automated data cleaning tasks using predefined rules and methods from pandas. It does not incorporate any AI algorithms. Therefore, it is considered **automation**.
-
-### 2. **PreprocessingAgent**
-
-- **Purpose:** Handles further preprocessing of the dataset to prepare it for analysis.
-- **Functions:**
-  - Identifies numeric and categorical columns.
-  - Handles missing values by imputing means for numeric columns and filling 'Unknown' for categorical columns.
-  - Converts date columns to datetime objects.
-  - Attempts to convert object-type columns to numeric where possible.
-- **Considered AI or Automation?** This agent automates data preprocessing steps using standard techniques. It does not involve AI but follows set rules and heuristics. Therefore, it is considered **automation**.
-
-### 3. **AnalysisAgent**
-
-- **Purpose:** Performs statistical analyses on the dataset based on specified parameters.
-- **Functions:**
-  - Generates descriptive statistics.
-  - Computes the correlation matrix.
-  - Analyzes missing values.
-  - Counts values for categorical variables.
 
 # Data Analysis Web Application
 
