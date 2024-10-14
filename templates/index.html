@@ -11,6 +11,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+    <style>
+        /* Style for the chatbot iframe */
+        #chatbot-frame {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            height: 500px;
+            border: none;
+            z-index: 1000; /* Ensure the chatbot is on top */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -106,5 +120,9 @@
             }
         });
     </script>
+
+    <!-- Chatbot iframe -->
+    <iframe id="chatbot-frame" src="https://analyticbot-55abf8bf2885.herokuapp.com/" title="AnalytIQ Chatbot"></iframe>
+
 </body>
 </html>
