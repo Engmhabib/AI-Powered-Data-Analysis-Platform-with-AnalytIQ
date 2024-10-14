@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Analysis Platform</title>
     <!-- Include Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,188 +11,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <style>
-        /* Chatbot Styles */
-        #chatbox {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 600px;
-            max-width: 90%;
-            max-height: 800px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: none;
-            font-family: Arial, sans-serif;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        #chatbox.show {
-            display: block;
-            opacity: 1;
-        }
-
-        #chatbox header {
-            background-color: #007BFF;
-            color: white;
-            padding: 10px;
-            border-radius: 10px 10px 0 0;
-            text-align: center;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        #chatbox header img {
-            margin-right: 10px;
-            height: 30px;
-        }
-
-        #chatbox header button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            position: absolute;
-            right: 10px;
-        }
-
-        #chatbox .content {
-            padding: 10px;
-            max-height: 500px;
-            overflow-y: scroll;
-        }
-
-        #chatbox .message {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 10px;
-            line-height: 1.4;
-        }
-
-        #chatbox .user-message {
-            text-align: right;
-            background-color: #DCF8C6;
-            color: #333;
-            align-self: flex-end;
-        }
-
-        #chatbox .bot-message {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            background-color: #F1F0F0;
-            color: #333;
-            align-self: flex-start;
-        }
-
-        #chatbox footer {
-            display: flex;
-            padding: 10px;
-            align-items: center;
-        }
-
-        #chatbox input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #chatbox footer button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-left: 5px;
-        }
-
-        #chatbot-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: transparent;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            box-shadow: none;
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            width: 100px;
-        }
-
-        #chatbot-toggle img {
-            height: 80px;
-            width: 80px;
-        }
-
-        #chatbot-toggle span {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #007BFF;
-            display: block;
-            text-align: center;
-            width: 100%;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid #007BFF;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            margin: 10px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 600px) {
-            #chatbox {
-                width: 100%;
-                max-height: 60%;
-            }
-
-            #chatbot-toggle {
-                width: 80px;
-            }
-
-            #chatbot-toggle img {
-                height: 60px;
-                width: 60px;
-            }
-
-            #chatbox footer {
-                flex-direction: column;
-            }
-
-            #chatbox input, #chatbox footer button {
-                width: 100%;
-                margin: 5px 0;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -202,7 +19,7 @@
             <p class="lead">Upload your dataset and gain insights instantly.</p>
         </div>
 
-        <!-- Flash Messages -->
+        <!-- Display Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <div class="alert alert-warning" role="alert">
@@ -225,8 +42,38 @@
                     <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" class="form-check-input" checked>
                     <label for="descriptive_statistics" class="form-check-label">Descriptive Statistics</label>
                 </div>
-                <!-- Additional form options omitted for brevity -->
-                
+                <div class="form-check">
+                    <input type="checkbox" name="correlation_matrix" id="correlation_matrix" class="form-check-input" checked>
+                    <label for="correlation_matrix" class="form-check-label">Correlation Matrix</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="missing_values" id="missing_values" class="form-check-input">
+                    <label for="missing_values" class="form-check-label">Missing Values Analysis</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="value_counts" id="value_counts" class="form-check-input">
+                    <label for="value_counts" class="form-check-label">Value Counts for Categorical Variables</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="time_series_analysis" id="time_series_analysis" class="form-check-input">
+                    <label for="time_series_analysis" class="form-check-label">Time Series Analysis</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="clustering_analysis" id="clustering_analysis" class="form-check-input">
+                    <label for="clustering_analysis" class="form-check-label">Clustering Analysis</label>
+                </div>
+
+                <div class="mt-4">
+                    <label for="user_query" class="form-label">Or ask a question:</label>
+                    <input type="text" name="user_query" id="user_query" class="form-control" placeholder="e.g., What is the correlation between age and income?">
+                    <small class="text-muted">You can enter a natural language query instead of selecting parameters above.</small>
+                </div>
+
+                <div class="mt-4">
+                    <label for="styling_params" class="form-label">Styling Preferences:</label>
+                    <textarea name="styling_params" id="styling_params" rows="4" class="form-control" placeholder="Enter any styling preferences here...">Default styling.</textarea>
+                </div>
+
                 <div class="text-center mt-5">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-chart-line me-2"></i>Analyze Data
@@ -236,114 +83,28 @@
         </div>
     </div>
 
-    <!-- Chatbot Integration -->
-    <button id="chatbot-toggle" aria-label="Toggle chat with AnalytIQ">
-        <span>Hi! I am AnalytIQ</span>
-        <img src="{{ url_for('static', filename='fb.png') }}" alt="AnalytIQ Logo">
-    </button>
-
-    <div id="chatbox">
-        <header>
-            <img src="{{ url_for('static', filename='fb.png') }}" alt="AnalytIQ Logo">
-            AnalytIQ
-            <button id="minimize-chatbox" aria-label="Minimize chatbox">&minus;</button>
-        </header>
-        <div class="content"></div>
-        <footer>
-            <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="get-answer">Send</button>
-        </footer>
-    </div>
-
     <!-- Include Bootstrap 5 JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Chatbot JavaScript -->
+    <!-- Add JavaScript to handle file validation and empty fields -->
     <script>
-        document.getElementById('chatbot-toggle').addEventListener('click', function() {
-            var chatbox = document.getElementById('chatbox');
-            chatbox.style.display = 'block';
-            setTimeout(() => chatbox.classList.add('show'), 50);
-            this.style.display = 'none';
-        });
-
-        document.getElementById('minimize-chatbox').addEventListener('click', function() {
-            var chatbox = document.getElementById('chatbox');
-            var chatbotToggle = document.getElementById('chatbot-toggle');
-            chatbox.classList.remove('show');
-            setTimeout(() => {
-                chatbox.style.display = 'none';
-                chatbotToggle.style.display = 'block';
-            }, 300);
-        });
-
-        document.getElementById('get-answer').addEventListener('click', function() {
-            var userInput = document.getElementById('user-input').value;
-            var contentDiv = document.querySelector('#chatbox .content');
-
-            if (!userInput.trim()) {
-                var errorMessage = document.createElement('div');
-                errorMessage.textContent = 'Please enter a question.';
-                errorMessage.classList.add('message', 'bot-message');
-                contentDiv.appendChild(errorMessage);
-                contentDiv.scrollTop = contentDiv.scrollHeight;
-                return;
+        // Validate file size (max 10MB)
+        document.getElementById('dataset').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.size > 10 * 1024 * 1024) {  // 10 MB limit
+                alert('File size exceeds 10 MB. Please upload a smaller file.');
+                this.value = '';  // Clear the file input
             }
-
-            var userMessage = document.createElement('div');
-            userMessage.textContent = escapeHtml(userInput);
-            userMessage.classList.add('message', 'user-message');
-            contentDiv.appendChild(userMessage);
-            document.getElementById('user-input').value = '';
-            document.getElementById('get-answer').disabled = true;
-
-            var fetchUrl = 'https://analyticbot-55abf8bf2885.herokuapp.com/question';
-            var loadingSpinner = document.createElement('div');
-            loadingSpinner.classList.add('spinner');
-            contentDiv.appendChild(loadingSpinner);
-            contentDiv.scrollTop = contentDiv.scrollHeight;
-
-            fetch(fetchUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ question: userInput })
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadingSpinner.remove();
-
-                var botMessage = document.createElement('div');
-                botMessage.classList.add('message', 'bot-message');
-                var messageText = document.createElement('div');
-                messageText.classList.add('message-text');
-                messageText.textContent = data.answer;
-
-                botMessage.appendChild(messageText);
-                contentDiv.appendChild(botMessage);
-                contentDiv.scrollTop = contentDiv.scrollHeight;
-
-                document.getElementById('get-answer').disabled = false;
-            })
-            .catch(error => {
-                loadingSpinner.remove();
-                var errorMessage = document.createElement('div');
-                errorMessage.textContent = 'Error: Unable to get answer. Please try again later.';
-                errorMessage.classList.add('message', 'bot-message');
-                contentDiv.appendChild(errorMessage);
-                contentDiv.scrollTop = contentDiv.scrollHeight;
-                document.getElementById('get-answer').disabled = false;
-            });
         });
 
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/&/g, "&amp;")
-                         .replace(/</g, "&lt;")
-                         .replace(/>/g, "&gt;")
-                         .replace(/"/g, "&quot;")
-                         .replace(/'/g, "&#039;");
-        }
+        // Ensure that a file is selected before submission
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            const fileInput = document.getElementById('dataset');
+            if (!fileInput.files.length) {
+                alert('Please upload a CSV file to proceed.');
+                event.preventDefault();  // Prevent form submission
+            }
+        });
     </script>
 </body>
 </html>
