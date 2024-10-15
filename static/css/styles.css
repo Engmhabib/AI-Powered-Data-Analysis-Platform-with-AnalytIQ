@@ -1,18 +1,21 @@
 /* Base Styles */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #f4f6f9;
+    background-color: #f8fafc; /* Slightly lighter for a cleaner feel */
     color: #333;
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    -webkit-font-smoothing: antialiased; /* Smoother fonts */
+    -moz-osx-font-smoothing: grayscale;  /* Smoother fonts */
 }
 
 /* Typography */
 h1, h2, h3, h4 {
-    color: #343a40;
-    font-weight: 600;
+    color: #1a1f36; /* Darker, richer heading color */
+    font-weight: 700; /* Increase font weight for more prominence */
     margin-bottom: 1rem;
+    letter-spacing: -0.5px; /* Slightly tighter for modern look */
 }
 
 p, small {
@@ -20,12 +23,13 @@ p, small {
 }
 
 small {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
 }
 
 a {
     color: #0d6efd;
     text-decoration: none;
+    font-weight: 500; /* Slightly bolder for clarity */
     transition: color 0.2s ease;
 }
 
@@ -33,22 +37,25 @@ a:hover {
     color: #0056b3;
 }
 
-/* Decrease Width of Page */
+/* Container for SaaS Design */
 .container {
-    max-width: 800px; /* Decrease page width */
-    margin: 0 auto;   /* Center the container */
-    padding: 20px;    /* Add padding for spacing */
+    max-width: 1100px; /* Wider for more content space */
+    margin: 0 auto;
+    padding: 40px 20px; /* More padding for luxurious feel */
 }
 
 /* Navbar (if applicable) */
 .navbar {
     background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Higher shadow for more depth */
+    padding: 10px 0;
+    z-index: 100;
 }
 
 .navbar .nav-link {
     color: #495057;
-    margin-right: 1rem;
+    margin-right: 1.5rem; /* More spacing for better separation */
+    font-weight: 500;
 }
 
 .navbar .nav-link:hover {
@@ -59,15 +66,16 @@ a:hover {
 .card {
     background-color: #fff;
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 20px;
-    transition: box-shadow 0.3s ease;
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.05); /* Softer shadow */
+    padding: 30px; /* More padding for spacing */
+    margin-bottom: 30px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .card:hover {
-    box-shadow: 0 1rem 1.5rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px); /* Subtle lift effect */
 }
 
 /* Buttons */
@@ -75,28 +83,32 @@ a:hover {
     background-color: #0d6efd;
     border: none;
     border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    padding: 12px 25px;
+    font-size: 1.125rem; /* Slightly larger for premium feel */
+    font-weight: 600;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .btn-primary:hover {
     background-color: #0056b3;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px); /* Slight button lift on hover */
 }
 
 .btn-secondary {
     background-color: #6c757d;
     border: none;
     border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    padding: 12px 25px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .btn-secondary:hover {
     background-color: #5a6268;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
 }
 
 .btn {
@@ -111,8 +123,8 @@ a:hover {
 /* Forms */
 input, textarea, select {
     width: 100%;
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 12px 15px;
+    border-radius: 10px;
     border: 1px solid #ddd;
     font-size: 1rem;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -120,7 +132,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
     border-color: #0d6efd;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
     outline: none;
 }
 
@@ -129,18 +141,19 @@ input::placeholder, textarea::placeholder {
 }
 
 .form-check-input {
-    margin-right: 0.5rem;
+    margin-right: 0.75rem; /* More space for modern spacing */
 }
 
 .form-check-label {
-    margin-left: 0.5rem;
+    margin-left: 0.75rem;
 }
 
 /* Alerts */
 .alert {
-    border-radius: 8px;
-    padding: 15px;
-    font-size: 1rem;
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 1.125rem;
+    margin-bottom: 20px;
 }
 
 .alert-warning {
@@ -153,19 +166,14 @@ input::placeholder, textarea::placeholder {
     color: #155724;
 }
 
-/* Cards Shadows */
-.shadow-sm {
-    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
-}
-
 /* Margins and Spacing */
 .mt-5 { margin-top: 3rem !important; }
-.mt-4 { margin-top: 1.5rem !important; }
-.mt-3 { margin-top: 1rem !important; }
+.mt-4 { margin-top: 2rem !important; } /* Adjusted for better spacing */
+.mt-3 { margin-top: 1.5rem !important; }
 
 .mb-5 { margin-bottom: 3rem !important; }
-.mb-4 { margin-bottom: 1.5rem !important; }
-.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 2rem !important; }
+.mb-3 { margin-bottom: 1.5rem !important; }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
@@ -177,6 +185,12 @@ input::placeholder, textarea::placeholder {
         margin-bottom: 1rem;
     }
     .container {
-        padding: 10px;
+        padding: 20px; /* Increased padding for better mobile UX */
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px;
     }
 }
