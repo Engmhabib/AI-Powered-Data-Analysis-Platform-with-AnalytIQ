@@ -1,38 +1,47 @@
 /* General styles */
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #f1f3f5; /* Lighter background for a cleaner look */
-    color: #495057; /* Subtle dark color for text */
+    background-color: #f1f3f5;
+    color: #495057;
     margin: 0;
     padding: 0;
+    line-height: 1.6; /* Improve readability */
 }
 
 h1, h2, h3, h4 {
-    color: #212529; /* Slightly darker text for headings */
-    font-weight: 600; /* Enhance boldness for hierarchy */
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 1rem; /* Add space below headings */
 }
 
 a {
     text-decoration: none;
     color: #0d6efd;
-    transition: color 0.3s ease; /* Smooth hover effect */
+    transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #0a58ca; /* Darken the link on hover */
+    color: #0a58ca;
+}
+
+/* Container for platform width */
+.container {
+    max-width: 1140px; /* Limit max width for better readability */
+    margin: 0 auto; /* Center container */
+    padding: 0 20px; /* Add padding for small screens */
 }
 
 /* Navigation Tabs */
 .nav-tabs .nav-link {
-    border-radius: 0.25rem; /* Smooth edges */
-    color: #495057; /* Muted color for inactive links */
+    border-radius: 0.25rem;
+    color: #495057;
     transition: background-color 0.3s, color 0.3s;
 }
 
 .nav-tabs .nav-link.active {
     background-color: #0d6efd;
     color: white !important;
-    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1); /* Slight shadow for active tab */
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1);
 }
 
 /* Buttons */
@@ -45,7 +54,7 @@ a:hover {
 }
 
 .btn-primary:hover {
-    background-color: #0a58ca; /* Slightly darker on hover */
+    background-color: #0a58ca;
 }
 
 .btn-secondary {
@@ -57,7 +66,7 @@ a:hover {
 }
 
 .btn-secondary:hover {
-    background-color: #565e64; /* Darker on hover */
+    background-color: #565e64;
 }
 
 /* Alerts */
@@ -66,26 +75,34 @@ a:hover {
     color: #856404;
     border-radius: 0.25rem;
     padding: 1rem;
-    border-left: 5px solid #856404; /* Distinctive marker */
+    border-left: 5px solid #856404;
 }
 
 /* Cards */
 .card {
     border: none;
-    border-radius: 0.5rem; /* Softer corners */
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Light shadow for elevation */
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease;
 }
 
 .card:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Tables */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
 .table th, .table td {
     text-align: center;
     vertical-align: middle;
     padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
@@ -103,7 +120,7 @@ a:hover {
 
 /* Forms */
 .form-check-label {
-    margin-left: 0.75rem; /* Increase spacing for better alignment */
+    margin-left: 0.75rem;
 }
 
 input, select, textarea {
@@ -114,8 +131,8 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: #0d6efd; /* Highlight input field on focus */
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25); /* Subtle focus effect */
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
 /* Margins and Spacing */
@@ -133,5 +150,5 @@ input:focus, select:focus, textarea:focus {
 
 /* Hover Effects */
 .btn:hover, .card:hover {
-    opacity: 0.95; /* Slight transparency effect for a more refined feel */
+    opacity: 0.95;
 }
