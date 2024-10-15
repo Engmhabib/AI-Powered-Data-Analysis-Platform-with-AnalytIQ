@@ -26,7 +26,7 @@ a:hover {
 
 /* Container for platform width */
 .container {
-    max-width: 1140px; /* Limit max width for better readability */
+    max-width: 900px; /* Limit max width for better readability */
     margin: 0 auto; /* Center container */
     padding: 0 20px; /* Add padding for small screens */
 }
