@@ -22,6 +22,14 @@ body {
     color: #0d6efd;
 }
 
+.navbar {
+    padding: 1rem;
+}
+
+.navbar-toggler {
+    border: none;
+}
+
 /* Hero Section */
 .hero-section {
     background: linear-gradient(135deg, #f0f4ff 0%, #d9e4ff 100%);
@@ -36,11 +44,6 @@ body {
 .hero-section .lead {
     font-size: 1.25rem;
     color: #6c757d;
-}
-
-.hero-section .btn-primary {
-    padding: 0.75rem 2rem;
-    font-size: 1.125rem;
 }
 
 /* Card Styles */
@@ -123,6 +126,10 @@ textarea.form-control {
 #chatbot-toggle img {
     width: 30px;
     height: 30px;
+}
+
+#chatbot-toggle span {
+    display: none;
 }
 
 #chatbox {
