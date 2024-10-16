@@ -10,7 +10,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
 </head>
@@ -109,28 +109,27 @@
 
     <!-- Chatbot Toggle Button -->
     <button id="chatbot-toggle" aria-label="Toggle chat with AnalytIQ">
-        <img src="{{ url_for('static', filename='images/chatbot-icon.png') }}" alt="Chatbot Icon">
-        <span>Chat with AnalytIQ</span>
+        <span>Hi! I am AnalytIQ</span>
+        <img src="{{ url_for('static', filename='images/fb.png') }}" alt="AnalytIQ Logo">
     </button>
 
     <!-- Chatbot Container -->
     <div id="chatbox">
         <header>
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo">
-            <span>AnalytIQ Assistant</span>
+            <img src="{{ url_for('static', filename='images/fb.png') }}" alt="AnalytIQ Logo">
+            AnalytIQ
             <button id="minimize-chatbox" aria-label="Minimize chatbox">&minus;</button>
         </header>
         <div class="content"></div>
         <footer>
             <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="voice-input-button" aria-label="Use voice input"><i class="fas fa-microphone"></i></button>
-            <button id="get-answer" class="btn btn-primary">Send</button>
+            <button id="voice-input-button" aria-label="Use voice input">&#127908;</button>
+            <button id="get-answer">Send</button>
         </footer>
     </div>
 
     <!-- Include Bootstrap 5 JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <!-- Chatbot JavaScript -->
     <script>
         // Variable to track if the last input was via voice
