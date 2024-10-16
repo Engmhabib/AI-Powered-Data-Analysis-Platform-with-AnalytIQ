@@ -2,142 +2,598 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AnalytIQ - Data Analysis Platform</title>
+    <title>Data Analysis Platform</title>
     <!-- Include Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Include Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Chatbot CSS -->
+    <style>
+        /* Chatbot Styles */
+        #chatbox {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-width: 90%;
+            max-height: 800px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #chatbox.show {
+            display: block;
+            opacity: 1;
+        }
+
+        #chatbox header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #chatbox header img {
+            margin-right: 10px;
+            height: 30px;
+        }
+
+        #chatbox header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+        }
+
+        #chatbox .content {
+            padding: 10px;
+            max-height: 500px;
+            overflow-y: scroll;
+        }
+
+        #chatbox .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            line-height: 1.4;
+        }
+
+        #chatbox .user-message {
+            text-align: right;
+            background-color: #DCF8C6;
+            color: #333;
+            align-self: flex-end;
+        }
+
+        /* Updated .bot-message class */
+        #chatbox .bot-message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            background-color: #F1F0F0;
+            color: #333;
+            align-self: flex-start;
+        }
+
+        /* Styles for the message text */
+        #chatbox .bot-message .message-text {
+            flex-grow: 1;
+        }
+
+        #chatbox footer {
+            display: flex;
+            padding: 10px;
+            align-items: center;
+        }
+
+        #chatbox input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #chatbox footer button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        #chatbox footer button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Styles for the voice input button */
+        #voice-input-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            margin-left: 5px;
+            color: #007BFF;
+        }
+
+        #voice-input-button:hover {
+            color: #0056b3;
+        }
+
+        #voice-input-button.recording {
+            color: red;
+        }
+
+        #chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: transparent;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: none;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100px;
+        }
+
+        #chatbot-toggle img {
+            height: 80px;
+            width: 80px;
+        }
+
+        #chatbot-toggle span {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #007BFF;
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #007BFF;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Styles for the copy and voice buttons */
+        .copy-button, .voice-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px; /* Space between buttons */
+            color: #007BFF;
+        }
+
+        .copy-button:hover, .voice-button:hover {
+            color: #0056b3;
+        }
+
+        /* Styles for the button container */
+        .button-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 5px; /* Space between the message and buttons */
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            #chatbox {
+                width: 100%;
+                max-height: 60%;
+            }
+
+            #chatbot-toggle {
+                width: 80px;
+            }
+
+            #chatbot-toggle img {
+                height: 60px;
+                width: 60px;
+            }
+
+            #chatbox footer {
+                flex-direction: column;
+            }
+
+            #chatbox input, #chatbox footer button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
     <!-- Include Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="40">
-                Analyt<span class="text-primary">IQ</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <div class="container mt-5">
+        <div class="text-center mb-5">
+            <h1 class="mb-3">Welcome to the Data Analysis Platform</h1>
+            <p class="lead">Upload your dataset and gain insights instantly.</p>
         </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section text-center py-5">
-        <div class="container">
-            <h1 class="display-4 fw-bold">Welcome to <span class="text-primary">AnalytIQ</span></h1>
-            <p class="lead text-muted mb-5">Upload your dataset and gain insights instantly.</p>
-            <a href="#upload-section" class="btn btn-primary btn-lg">Get Started</a>
-        </div>
-    </section>
-
-    <!-- Upload and Analysis Section -->
-    <section id="upload-section" class="py-5 bg-light">
-        <div class="container">
-            <!-- Display Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                  {% for category, message in messages %}
-                    <p class="mb-0">{{ message }}</p>
-                  {% endfor %}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-              {% endif %}
-            {% endwith %}
-
-            <div class="card shadow-sm p-4">
-                <form method="post" enctype="multipart/form-data">
-                    <div class="mb-4">
-                        <label for="dataset" class="form-label fw-semibold">Choose CSV File</label>
-                        <input type="file" name="dataset" id="dataset" accept=".csv" class="form-control" required>
-                        <small class="text-muted">Max file size: 10MB</small>
-                    </div>
-
-                    <h4 class="mt-4 fw-bold">Analysis Parameters</h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" class="form-check-input" checked>
-                                <label for="descriptive_statistics" class="form-check-label">Descriptive Statistics</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="correlation_matrix" id="correlation_matrix" class="form-check-input" checked>
-                                <label for="correlation_matrix" class="form-check-label">Correlation Matrix</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="missing_values" id="missing_values" class="form-check-input">
-                                <label for="missing_values" class="form-check-label">Missing Values Analysis</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="value_counts" id="value_counts" class="form-check-input">
-                                <label for="value_counts" class="form-check-label">Value Counts for Categorical Variables</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="time_series_analysis" id="time_series_analysis" class="form-check-input">
-                                <label for="time_series_analysis" class="form-check-label">Time Series Analysis</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" name="clustering_analysis" id="clustering_analysis" class="form-check-input">
-                                <label for="clustering_analysis" class="form-check-label">Clustering Analysis</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <label for="user_query" class="form-label fw-semibold">Or ask a question</label>
-                        <input type="text" name="user_query" id="user_query" class="form-control" placeholder="e.g., What is the correlation between age and income?">
-                        <small class="text-muted">You can enter a natural language query instead of selecting parameters above.</small>
-                    </div>
-
-                    <div class="mt-4">
-                        <label for="styling_params" class="form-label fw-semibold">Styling Preferences</label>
-                        <textarea name="styling_params" id="styling_params" rows="3" class="form-control" placeholder="Enter any styling preferences here...">Default styling.</textarea>
-                    </div>
-
-                    <div class="text-center mt-5">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-chart-line me-2"></i> Analyze Data
-                        </button>
-                    </div>
-                </form>
+        <!-- Display Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="alert alert-warning" role="alert">
+              {% for category, message in messages %}
+                <p class="mb-0">{{ message }}</p>
+              {% endfor %}
             </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="card shadow-sm p-4">
+            <form method="post" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label for="dataset" class="form-label">Choose CSV File:</label>
+                    <input type="file" name="dataset" id="dataset" accept=".csv" class="form-control" required>
+                </div>
+
+                <h4 class="mt-4">Analysis Parameters:</h4>
+                <div class="form-check">
+                    <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" class="form-check-input" checked>
+                    <label for="descriptive_statistics" class="form-check-label">Descriptive Statistics</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="correlation_matrix" id="correlation_matrix" class="form-check-input" checked>
+                    <label for="correlation_matrix" class="form-check-label">Correlation Matrix</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="missing_values" id="missing_values" class="form-check-input">
+                    <label for="missing_values" class="form-check-label">Missing Values Analysis</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="value_counts" id="value_counts" class="form-check-input">
+                    <label for="value_counts" class="form-check-label">Value Counts for Categorical Variables</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="time_series_analysis" id="time_series_analysis" class="form-check-input">
+                    <label for="time_series_analysis" class="form-check-label">Time Series Analysis</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="clustering_analysis" id="clustering_analysis" class="form-check-input">
+                    <label for="clustering_analysis" class="form-check-label">Clustering Analysis</label>
+                </div>
+
+                <div class="mt-4">
+                    <label for="user_query" class="form-label">Or ask a question:</label>
+                    <input type="text" name="user_query" id="user_query" class="form-control" placeholder="e.g., What is the correlation between age and income?">
+                    <small class="text-muted">You can enter a natural language query instead of selecting parameters above.</small>
+                </div>
+
+                <div class="mt-4">
+                    <label for="styling_params" class="form-label">Styling Preferences:</label>
+                    <textarea name="styling_params" id="styling_params" rows="4" class="form-control" placeholder="Enter any styling preferences here...">Default styling.</textarea>
+                </div>
+
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>Analyze Data
+                    </button>
+                </div>
+            </form>
         </div>
-    </section>
+    </div>
 
     <!-- Chatbot Toggle Button -->
     <button id="chatbot-toggle" aria-label="Toggle chat with AnalytIQ">
-        <img src="{{ url_for('static', filename='images/chatbot-icon.png') }}" alt="Chatbot Icon">
-        <span>Chat with AnalytIQ</span>
+        <span>Hi! I am AnalytIQ</span>
+        <img src="{{ url_for('static', filename='images/fb.png') }}" alt="AnalytIQ Logo">
     </button>
 
     <!-- Chatbot Container -->
     <div id="chatbox">
         <header>
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo">
-            <span>AnalytIQ Assistant</span>
+            <img src="{{ url_for('static', filename='images/fb.png') }}" alt="AnalytIQ Logo">
+            AnalytIQ
             <button id="minimize-chatbox" aria-label="Minimize chatbox">&minus;</button>
         </header>
         <div class="content"></div>
         <footer>
             <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="voice-input-button" aria-label="Use voice input"><i class="fas fa-microphone"></i></button>
-            <button id="get-answer" class="btn btn-primary">Send</button>
+            <button id="voice-input-button" aria-label="Use voice input">&#127908;</button>
+            <button id="get-answer">Send</button>
         </footer>
     </div>
 
     <!-- Include Bootstrap 5 JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Include Custom JavaScript -->
-    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+    <!-- Chatbot JavaScript -->
+    <script>
+        // Variable to track if the last input was via voice
+        var isVoiceInput = false;
+
+        document.getElementById('chatbot-toggle').addEventListener('click', function() {
+            var chatbox = document.getElementById('chatbox');
+            chatbox.style.display = 'block';
+            setTimeout(() => chatbox.classList.add('show'), 50);
+            this.style.display = 'none';
+        });
+
+        document.getElementById('minimize-chatbox').addEventListener('click', function() {
+            var chatbox = document.getElementById('chatbox');
+            var chatbotToggle = document.getElementById('chatbot-toggle');
+            chatbox.classList.remove('show');
+            
+            // Stop any ongoing speech synthesis
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+            }
+
+            setTimeout(() => {
+                chatbox.style.display = 'none';
+                chatbotToggle.style.display = 'flex';
+            }, 300);
+        });
+
+        document.getElementById('user-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('get-answer').click();
+            }
+        });
+
+        document.getElementById('get-answer').addEventListener('click', function() {
+            var userInput = document.getElementById('user-input').value;
+            var contentDiv = document.querySelector('#chatbox .content');
+
+            if (!userInput.trim()) {
+                var errorMessage = document.createElement('div');
+                errorMessage.textContent = 'Please enter a question.';
+                errorMessage.classList.add('message', 'bot-message');
+                contentDiv.appendChild(errorMessage);
+                contentDiv.scrollTop = contentDiv.scrollHeight;
+                return;
+            }
+
+            var userMessage = document.createElement('div');
+            userMessage.textContent = escapeHtml(userInput);
+            userMessage.classList.add('message', 'user-message');
+            contentDiv.appendChild(userMessage);
+            document.getElementById('user-input').value = '';
+            document.getElementById('get-answer').disabled = true;
+
+            var fetchUrl = 'https://analyticbot-55abf8bf2885.herokuapp.com/question';
+
+            var loadingSpinner = document.createElement('div');
+            loadingSpinner.classList.add('spinner');
+            contentDiv.appendChild(loadingSpinner);
+            contentDiv.scrollTop = contentDiv.scrollHeight;
+
+            fetch(fetchUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingSpinner.remove();
+
+                // Create the bot message container
+                var botMessage = document.createElement('div');
+                botMessage.classList.add('message', 'bot-message');
+
+                // Create the message text element
+                var messageText = document.createElement('div');
+                messageText.classList.add('message-text');
+                messageText.textContent = data.answer;
+
+                // Create the copy button
+                var copyButton = document.createElement('button');
+                copyButton.classList.add('copy-button');
+                copyButton.setAttribute('aria-label', 'Copy to clipboard');
+                copyButton.innerHTML = '&#128203;'; // Clipboard emoji
+
+                // Add click event to the copy button
+                copyButton.addEventListener('click', function() {
+                    copyToClipboard(data.answer);
+                });
+
+                // Create the voice button
+                var voiceButton = document.createElement('button');
+                voiceButton.classList.add('voice-button');
+                voiceButton.setAttribute('aria-label', 'Listen to the answer');
+                voiceButton.innerHTML = '&#128266;'; // Speaker with sound waves emoji
+
+                // Add click event to the voice button
+                voiceButton.addEventListener('click', function() {
+                    speakText(data.answer);
+                });
+
+                // Create a container for the buttons
+                var buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container');
+
+                // Append buttons to the button container
+                buttonContainer.appendChild(copyButton);
+                buttonContainer.appendChild(voiceButton);
+
+                // Append the message text and button container to the bot message
+                botMessage.appendChild(messageText);
+                botMessage.appendChild(buttonContainer);
+
+                // Append the bot message to the content div
+                contentDiv.appendChild(botMessage);
+                contentDiv.scrollTop = contentDiv.scrollHeight;
+
+                // Automatically speak the answer if the input was via voice
+                if (isVoiceInput) {
+                    speakText(data.answer);
+                    isVoiceInput = false; // Reset the flag
+                }
+
+                document.getElementById('get-answer').disabled = false;
+            })
+            .catch(error => {
+                loadingSpinner.remove();
+                console.error('Error:', error);
+                var errorMessage = document.createElement('div');
+                if (error.message.includes('NetworkError')) {
+                    errorMessage.textContent = 'Network error: Please check your connection.';
+                } else {
+                    errorMessage.textContent = 'Error: Unable to get answer. Please try again later.';
+                }
+                errorMessage.classList.add('message', 'bot-message');
+                contentDiv.appendChild(errorMessage);
+                contentDiv.scrollTop = contentDiv.scrollHeight;
+                document.getElementById('get-answer').disabled = false;
+            });
+
+            document.getElementById('user-input').focus();
+        });
+
+        // Function to copy text to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                console.log('Answer copied to clipboard!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        // Function to speak the text
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel(); // Stop any ongoing speech
+                var utterance = new SpeechSynthesisUtterance(text);
+                speechSynthesis.speak(utterance);
+            } else {
+                alert('Sorry, your browser does not support text-to-speech.');
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Voice input functionality
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        var recognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; // Set the language
+            recognition.continuous = false; // Stop automatically after the user stops speaking
+            recognition.interimResults = false; // Do not return interim results
+
+            document.getElementById('voice-input-button').addEventListener('click', function() {
+                recognition.start();
+                this.classList.add('recording');
+            });
+
+            recognition.onresult = function(event) {
+                var transcript = event.results[0][0].transcript;
+                document.getElementById('user-input').value = transcript;
+                document.getElementById('voice-input-button').classList.remove('recording');
+
+                // Set the flag to indicate that voice input was used
+                isVoiceInput = true;
+
+                // Automatically trigger the send button
+                document.getElementById('get-answer').click();
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                document.getElementById('voice-input-button').classList.remove('recording');
+
+                // Optionally display error message in the chat interface
+                var contentDiv = document.querySelector('#chatbox .content');
+                var errorMessage = document.createElement('div');
+                errorMessage.classList.add('message', 'bot-message');
+
+                if (event.error === 'no-speech') {
+                    // Handle the 'no-speech' error silently or with a gentle notification
+                    errorMessage.textContent = 'No speech detected. Please try speaking again.';
+                } else if (event.error === 'audio-capture') {
+                    errorMessage.textContent = 'No microphone found. Please ensure your microphone is working.';
+                } else if (event.error === 'not-allowed') {
+                    errorMessage.textContent = 'Permission to use microphone denied.';
+                } else {
+                    errorMessage.textContent = 'Error during speech recognition: ' + event.error;
+                }
+
+                contentDiv.appendChild(errorMessage);
+                contentDiv.scrollTop = contentDiv.scrollHeight;
+            };
+
+            recognition.onend = function() {
+                document.getElementById('voice-input-button').classList.remove('recording');
+            };
+        } else {
+            // If SpeechRecognition is not supported, disable the button
+            document.getElementById('voice-input-button').disabled = true;
+            document.getElementById('voice-input-button').title = 'Speech recognition not supported in this browser';
+        }
+    </script>
+
+    <!-- Existing Data Analysis Platform JavaScript -->
+    <script>
+        // Validate file size (max 10MB)
+        document.getElementById('dataset').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.size > 10 * 1024 * 1024) {  // 10 MB limit
+                alert('File size exceeds 10 MB. Please upload a smaller file.');
+                this.value = '';  // Clear the file input
+            }
+        });
+
+        // Ensure that a file is selected before submission
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            const fileInput = document.getElementById('dataset');
+            if (!fileInput.files.length) {
+                alert('Please upload a CSV file to proceed.');
+                event.preventDefault();  // Prevent form submission
+            }
+        });
+    </script>
 </body>
 </html>
