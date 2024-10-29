@@ -86,14 +86,14 @@ Welcome to the **AI-Powered Data Analysis Platform with AnalytIQ** repository! T
 
 ## Technology Stack
 
-- **Frontend:** HTML, CSS, JavaScript, React.js
+- **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python, Flask
 - **Database:** PostgreSQL / SQLite
 - **Vector Search:** FAISS
 - **Conversational AI:** OpenAI GPT-4 Turbo
 - **Data Processing:** Pandas, NumPy
 - **Visualization:** Plotly, Matplotlib, Seaborn
-- **Deployment:** Docker, AWS / Heroku
+- **Deployment:**  Heroku
 - **Version Control:** Git, GitHub
 
 ---
@@ -103,9 +103,8 @@ Welcome to the **AI-Powered Data Analysis Platform with AnalytIQ** repository! T
 ### Prerequisites
 
 - **Python 3.7+**
-- **pip** (Python package installer)
+- **pip** 
 - **Git**
-- **Docker** (optional, for containerized deployment)
 - **OpenAI API Key:** Required for AnalytIQ functionality.
 
 ### Setup
