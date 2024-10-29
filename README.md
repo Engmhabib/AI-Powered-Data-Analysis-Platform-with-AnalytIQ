@@ -235,16 +235,20 @@ seaborn==0.12.2
 │       └── demo_screenshot.png
 ├── requirements.txt
 ├── README.md
-└── .env  # Should not be checked into version control
+└── .env  # Should not be checked into version controlv  # Should not be checked into version control
 ```
 
-- **app.py:** Main Flask application file.
-- **agents.py:** Contains the agent classes for data processing, preprocessing, analysis, and visualization.
-- **analytiq.py:** Contains the implementation of the AnalytIQ conversational agent.
-- **templates:** HTML templates for rendering pages.
-- **static:** Static files like CSS, images, and JavaScript.
-- **requirements.txt:** Python dependencies.
-- **.env:** Environment variables (should be excluded from version control).
+static: Contains static assets such as CSS files and images.
+templates: Contains HTML templates for rendering web pages.
+.env: Environment variables file, which includes sensitive information (excluded from version control).
+.gitignore: Specifies files and directories to ignore in version control.
+LICENSE: License file for the project.
+Procfile: Configuration file used for deploying the application on platforms like Heroku.
+README.md: Documentation file providing detailed project information.
+agents.py: Contains agent classes for data processing, preprocessing, analysis, and visualization.
+app.py: The main application file that runs the Flask server.
+requirements.txt: Lists the dependencies required to run the project.
+runtime.txt: Specifies the runtime environment (Python version).
 
 ---
 
