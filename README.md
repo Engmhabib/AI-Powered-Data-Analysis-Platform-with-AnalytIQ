@@ -165,18 +165,22 @@ pip install -r requirements.txt
 **`requirements.txt` Example:**
 
 ```plaintext
-Flask==2.2.2
-Flask-Cors==3.0.10
-python-dotenv==0.21.0
-openai==0.27.0
-numpy==1.23.5
-faiss-cpu==1.7.3
-python-docx==0.8.11
-gunicorn==20.1.0  # For production deployment
-pandas==1.5.3
+requests==2.31.0
+Pillow==10.0.1
+Werkzeug==2.3.4
+numpy>=1.23,<1.25
 plotly==5.15.0
-matplotlib==3.6.2
-seaborn==0.12.2
+kaleido==0.2.1
+gunicorn==21.2.0
+Flask==2.2.5
+Flask-Cors==3.0.10
+python-dotenv==1.0.0
+tabulate==0.9.0
+matplotlib==3.8.0
+pandas==2.2.2
+statsmodels==0.14.2
+scikit-learn==1.2.2
+openai==0.28.0
 ```
 
 ---
