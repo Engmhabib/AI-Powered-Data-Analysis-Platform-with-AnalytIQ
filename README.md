@@ -3,7 +3,7 @@
 # 🚀 AI-Powered Data Analysis Platform with AnalytIQ 🚀
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-2.0%2B-blue.svg)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT%204-blue.svg)
 
