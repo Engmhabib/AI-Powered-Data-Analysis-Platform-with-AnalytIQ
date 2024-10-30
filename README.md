@@ -63,17 +63,6 @@ Welcome to the **AI-Powered Data Analysis Platform with AnalytIQ** repository! T
 
 ---
 
-## Demo
-
-![Demo Screenshot](demo_screenshot.png)
-
-*Illustration of the Data Analysis Platform and AnalytIQ in action.*
-
----
-
-## Architecture
-
-![Architecture Diagram](https://i.imgur.com/ArchitectureDiagram.png)
 
 1. **Frontend:** User Interface built with modern web technologies (e.g., HTML, CSS, JavaScript, React.js).
 2. **Backend:** Flask-based API server handling data processing and conversational agent interactions.
