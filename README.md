@@ -481,9 +481,9 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 
 ## Contact
 
-**Your Name** – [@yourtwitter](https://twitter.com/yourtwitter) – your.email@example.com
+**Your Name** – Mohamed Habib Agrebi , habibagrebi7@gmail.com
 
-Project Link: [https://github.com/yourusername/data-analysis-platform](https://github.com/yourusername/data-analysis-platform)
+Project Link: [https://github.com/Engmhabib/AI-Powered-Data-Analysis-Platform-with-AnalytIQ]
 
 ---
 
