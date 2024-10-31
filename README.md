@@ -222,9 +222,9 @@ openai==0.28.0
 │   └── analysis.html
 ├── static
 │   ├── css
-│   │   └── styles.css
-│   └── images
-│       └── demo_screenshot.png
+│       └── styles.css
+│   
+│      
 ├── requirements.txt
 ├── README.md
 └── .env  # Should not be checked into version controlv  # Should not be checked into version control
