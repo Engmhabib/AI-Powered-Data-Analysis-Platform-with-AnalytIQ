@@ -4,7 +4,7 @@
 /* General styles */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #f9fafb;
+    background-color: #f8f9fc;
     color: #212529;
     margin: 0;
     padding: 0;
@@ -12,88 +12,56 @@ body {
 }
 
 /* Navbar */
-.navbar {
-    padding: 1rem;
-}
-
 .navbar-brand {
     font-weight: 700;
     font-size: 1.5rem;
-    color: #212529;
+    color: #0d6efd;
 }
 
-.navbar-brand .text-primary {
+.navbar-brand span {
     color: #0d6efd;
+}
+
+.navbar {
+    padding: 1rem;
 }
 
 .navbar-toggler {
     border: none;
 }
 
-.navbar-light .navbar-nav .nav-link {
-    color: #212529;
-    margin-left: 1rem;
-}
-
-.navbar-light .navbar-nav .nav-link.active {
-    font-weight: 600;
-}
-
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-    color: white;
-    padding: 6rem 0;
-    position: relative;
-    z-index: 1;
-}
-
-.hero-section .text-highlight {
-    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background: linear-gradient(135deg, #e2edff 0%, #f8f9fc 100%);
 }
 
 .hero-section h1 {
     font-size: 3rem;
     font-weight: 700;
+    color: #212529;
 }
 
 .hero-section .lead {
     font-size: 1.25rem;
-    color: #e2e6ea;
+    color: #6c757d;
 }
 
 .hero-section .btn-primary {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #212529;
     padding: 0.75rem 1.5rem;
-    font-size: 1.125rem;
-    margin-top: 1rem;
-}
-
-.hero-section .btn-primary:hover {
-    background-color: #e0a800;
-    border-color: #d39e00;
+    font-size: 1rem;
+    border-radius: 0.375rem;
+    margin-top: 1.5rem;
 }
 
 /* Card Styles */
 .card {
     border: none;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     background-color: #ffffff;
     padding: 2rem;
-    margin-top: -4rem;
+    margin-top: -3rem;
     position: relative;
-    z-index: 2;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.card h4 {
-    border-bottom: 2px solid #0d6efd;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
+    z-index: 1;
 }
 
 /* Form Styles */
@@ -142,22 +110,18 @@ textarea.form-control {
     background-color: #0b5ed7;
 }
 
-.btn-primary.shadow {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
 /* Chatbot Styles */
 #chatbox {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 350px;
+    width: 360px;
     max-width: 90%;
-    max-height: 80vh;
+    max-height: 70%;
     background-color: white;
-    border: 1px solid #ccc;
+    border: 1px solid #e0e0e0;
     border-radius: 0.5rem;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     display: none;
     font-family: 'Inter', sans-serif;
     z-index: 1000;
@@ -173,7 +137,7 @@ textarea.form-control {
 #chatbox header {
     background-color: #0d6efd;
     color: white;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem;
     border-radius: 0.5rem 0.5rem 0 0;
     text-align: center;
     font-weight: bold;
@@ -195,37 +159,40 @@ textarea.form-control {
     font-size: 20px;
     cursor: pointer;
     position: absolute;
-    right: 15px;
+    right: 10px;
 }
 
 #chatbox .content {
     padding: 1rem;
-    max-height: 60vh;
+    max-height: calc(100% - 150px);
     overflow-y: auto;
 }
 
 #chatbox .message {
-    margin: 10px 0;
-    padding: 10px 15px;
-    border-radius: 1rem;
+    margin: 0.5rem 0;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
     line-height: 1.4;
     max-width: 80%;
 }
 
 #chatbox .user-message {
+    text-align: right;
+    background-color: #e9f7fe;
+    color: #0d6efd;
     align-self: flex-end;
-    background-color: #d1e7dd;
-    color: #0f5132;
-    border: 1px solid #badbcc;
+    margin-left: auto;
 }
 
 #chatbox .bot-message {
-    align-self: flex-start;
-    background-color: #f8d7da;
-    color: #842029;
-    border: 1px solid #f5c2c7;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    background-color: #f1f3f5;
+    color: #212529;
+    align-self: flex-start;
+    margin-right: auto;
 }
 
 #chatbox .bot-message .message-text {
@@ -234,39 +201,42 @@ textarea.form-control {
 
 #chatbox footer {
     display: flex;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem;
     align-items: center;
-    border-top: 1px solid #ced4da;
+    border-top: 1px solid #e0e0e0;
 }
 
 #chatbox input {
     flex-grow: 1;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem;
     border: 1px solid #ced4da;
     border-radius: 0.375rem;
+    font-size: 1rem;
 }
 
 #chatbox footer button {
     background-color: #0d6efd;
     color: white;
     border: none;
-    padding: 0.5rem 0.75rem;
+    padding: 0.65rem 0.9rem;
     border-radius: 0.375rem;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1.1rem;
     margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #chatbox footer button:hover {
     background-color: #0b5ed7;
 }
 
-/* Voice Input Button */
 #voice-input-button {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 24px;
+    font-size: 1.3rem;
     margin-left: 0.5rem;
     color: #0d6efd;
 }
@@ -279,44 +249,45 @@ textarea.form-control {
     color: red;
 }
 
-/* Chatbot Toggle Button */
 #chatbot-toggle {
     position: fixed;
     bottom: 20px;
     right: 20px;
     background-color: transparent;
+    color: #0d6efd;
     border: none;
+    border-radius: 50%;
     cursor: pointer;
     font-size: 20px;
+    box-shadow: none;
     z-index: 999;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    width: 100px;
-}
-
-#chatbot-toggle img {
-    height: 80px;
     width: 80px;
 }
 
+#chatbot-toggle img {
+    height: 60px;
+    width: 60px;
+}
+
 #chatbot-toggle span {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #0d6efd;
+    font-size: 14px;
+    margin-bottom: 5px;
     display: block;
     text-align: center;
     width: 100%;
 }
 
-/* Spinner */
 .spinner {
     border: 4px solid #f3f3f3;
     border-radius: 50%;
     border-top: 4px solid #0d6efd;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     animation: spin 1s linear infinite;
     margin: 10px auto;
 }
@@ -326,12 +297,12 @@ textarea.form-control {
     100% { transform: rotate(360deg); }
 }
 
-/* Copy and Voice Buttons */
+/* Styles for the copy and voice buttons */
 .copy-button, .voice-button {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
     margin-right: 10px;
     color: #0d6efd;
 }
@@ -340,77 +311,32 @@ textarea.form-control {
     color: #0b5ed7;
 }
 
+/* Styles for the button container */
 .button-container {
     display: flex;
     justify-content: flex-start;
     margin-top: 5px;
 }
 
-/* Media Queries */
-@media (max-width: 768px) {
-    .hero-section {
-        padding: 4rem 0;
-    }
-
-    .hero-section h1 {
-        font-size: 2.5rem;
-    }
-
-    .hero-section .lead {
-        font-size: 1.125rem;
-    }
-
-    .card {
-        margin-top: -2rem;
-    }
-
+/* Mobile responsiveness */
+@media (max-width: 600px) {
     #chatbox {
-        width: 90%;
-        max-height: 70vh;
-    }
-}
-
-@media (max-width: 576px) {
-    .hero-section {
-        padding: 3rem 0;
-    }
-
-    .hero-section h1 {
-        font-size: 2rem;
-    }
-
-    .hero-section .lead {
-        font-size: 1rem;
-    }
-
-    .navbar-brand {
-        font-size: 1.25rem;
-    }
-
-    .navbar-brand img {
-        height: 40px;
-    }
-
-    .navbar-toggler {
-        margin-right: 0;
-    }
-
-    .navbar-nav {
-        text-align: center;
-    }
-
-    .navbar-nav .nav-link {
-        margin-left: 0;
-        margin-bottom: 0.5rem;
+        width: 100%;
+        max-height: 60%;
+        bottom: 0;
+        right: 0;
+        border-radius: 0.5rem 0.5rem 0 0;
     }
 
     #chatbot-toggle {
-        width: 80px;
+        width: 60px;
+        bottom: 15px;
+        right: 15px;
     }
 
     #chatbot-toggle img {
-        height: 60px;
-        width: 60px;
+        height: 50px;
+        width: 50px;
     }
 
     #chatbox footer {
