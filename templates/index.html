@@ -16,25 +16,39 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="60">
-                Analyt<span class="text-primary">IQ</span>
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="50" class="me-2">
+                <span class="fw-bold">Analyt<span class="text-primary">IQ</span></span>
             </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <!-- Add more nav items if needed -->
+                </ul>
+            </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section text-center py-5">
+    <section class="hero-section text-center text-white">
         <div class="container">
-            <h1 class="display-4 fw-bold">Welcome to <span class="text-primary">AnalytIQ</span></h1>
-            <p class="lead text-muted mb-5">Upload your dataset and gain insights instantly.</p>
+            <h1 class="display-4 fw-bold">Unlock Insights with <span class="text-highlight">AnalytIQ</span></h1>
+            <p class="lead mb-5">Simplify your data analysis process. Upload your dataset and get instant results.</p>
+            <a href="#main-content" class="btn btn-primary btn-lg">
+                Get Started <i class="fas fa-arrow-down ms-2"></i>
+            </a>
         </div>
     </section>
 
     <!-- Main Content -->
-    <div class="container mt-5">
+    <div class="container mt-5" id="main-content">
         <!-- Display Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -47,7 +61,7 @@
           {% endif %}
         {% endwith %}
 
-        <div class="card shadow-sm p-4">
+        <div class="card shadow-sm p-4 mb-5">
             <form method="post" enctype="multipart/form-data">
                 <div class="mb-4">
                     <label for="dataset" class="form-label fw-semibold">Choose CSV File:</label>
@@ -99,7 +113,7 @@
                 </div>
 
                 <div class="text-center mt-5">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-primary btn-lg shadow">
                         <i class="fas fa-chart-line me-2"></i>Analyze Data
                     </button>
                 </div>
