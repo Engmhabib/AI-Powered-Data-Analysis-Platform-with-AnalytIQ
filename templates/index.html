@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>AnalytIQ - Data Analysis Platform</title>
     <!-- Include Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Include Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <!-- Include Google Fonts -->
@@ -16,26 +16,41 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="50" class="me-2">
-                <span class="fw-bold text-dark">Analyt<span class="text-primary">IQ</span></span>
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="50">
+                <span class="ms-2 fw-bold">Analyt<span class="text-warning">IQ</span></span>
             </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- Optional navigation links -->
+            <!--
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Add nav links if needed -->
+                </ul>
+            </div>
+            -->
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section text-center py-5">
-        <div class="container">
-            <h1 class="display-4 fw-bold">Welcome to <span class="text-primary">AnalytIQ</span></h1>
-            <p class="lead text-muted mb-5">Upload your dataset and gain insights instantly.</p>
-            <a href="#upload-section" class="btn btn-primary btn-lg">Get Started</a>
+    <section class="hero-section d-flex align-items-center justify-content-center">
+        <div class="container text-center">
+            <h1 class="display-3 fw-bold text-white">Welcome to <span class="text-warning">AnalytIQ</span></h1>
+            <p class="lead text-white-50 mb-4">Upload your dataset and gain insights instantly.</p>
+            <!-- Call to Action Button -->
+            <!--
+            <a href="#main-content" class="btn btn-lg btn-warning">Get Started</a>
+            -->
         </div>
     </section>
 
     <!-- Main Content -->
-    <div class="container mt-5" id="upload-section">
+    <div id="main-content" class="container mt-5">
         <!-- Display Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -48,7 +63,7 @@
           {% endif %}
         {% endwith %}
 
-        <div class="card shadow-sm p-4 mb-5">
+        <div class="card shadow-sm p-4">
             <form method="post" enctype="multipart/form-data">
                 <div class="mb-4">
                     <label for="dataset" class="form-label fw-semibold">Choose CSV File:</label>
@@ -59,29 +74,30 @@
                 <h4 class="mt-4 fw-bold">Analysis Parameters:</h4>
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-check mb-2">
+                        <!-- Updated checkboxes to switches -->
+                        <div class="form-check form-switch mb-2">
                             <input type="checkbox" name="descriptive_statistics" id="descriptive_statistics" class="form-check-input" checked>
                             <label for="descriptive_statistics" class="form-check-label">Descriptive Statistics</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check form-switch mb-2">
                             <input type="checkbox" name="correlation_matrix" id="correlation_matrix" class="form-check-input" checked>
                             <label for="correlation_matrix" class="form-check-label">Correlation Matrix</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check form-switch mb-2">
                             <input type="checkbox" name="missing_values" id="missing_values" class="form-check-input">
                             <label for="missing_values" class="form-check-label">Missing Values Analysis</label>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-check mb-2">
+                        <div class="form-check form-switch mb-2">
                             <input type="checkbox" name="value_counts" id="value_counts" class="form-check-input">
                             <label for="value_counts" class="form-check-label">Value Counts for Categorical Variables</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check form-switch mb-2">
                             <input type="checkbox" name="time_series_analysis" id="time_series_analysis" class="form-check-input">
                             <label for="time_series_analysis" class="form-check-label">Time Series Analysis</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check form-switch mb-2">
                             <input type="checkbox" name="clustering_analysis" id="clustering_analysis" class="form-check-input">
                             <label for="clustering_analysis" class="form-check-label">Clustering Analysis</label>
                         </div>
@@ -100,7 +116,7 @@
                 </div>
 
                 <div class="text-center mt-5">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-warning btn-lg">
                         <i class="fas fa-chart-line me-2"></i>Analyze Data
                     </button>
                 </div>
@@ -124,13 +140,13 @@
         <div class="content"></div>
         <footer>
             <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="voice-input-button" aria-label="Use voice input"><i class="fas fa-microphone"></i></button>
-            <button id="get-answer"><i class="fas fa-paper-plane"></i></button>
+            <button id="voice-input-button" aria-label="Use voice input">&#127908;</button>
+            <button id="get-answer">Send</button>
         </footer>
     </div>
 
     <!-- Include Bootstrap 5 JS and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Chatbot JavaScript -->
     <script>
         // Variable to track if the last input was via voice
@@ -217,7 +233,7 @@
                 var copyButton = document.createElement('button');
                 copyButton.classList.add('copy-button');
                 copyButton.setAttribute('aria-label', 'Copy to clipboard');
-                copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+                copyButton.innerHTML = '&#128203;'; // Clipboard emoji
 
                 // Add click event to the copy button
                 copyButton.addEventListener('click', function() {
@@ -228,7 +244,7 @@
                 var voiceButton = document.createElement('button');
                 voiceButton.classList.add('voice-button');
                 voiceButton.setAttribute('aria-label', 'Listen to the answer');
-                voiceButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+                voiceButton.innerHTML = '&#128266;'; // Speaker with sound waves emoji
 
                 // Add click event to the voice button
                 voiceButton.addEventListener('click', function() {
