@@ -16,11 +16,11 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="50" class="me-2">
-                <span class="fw-bold">Analyt<span class="text-primary">IQ</span></span>
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="60">
+                Analyt<span class="text-primary">IQ</span>
             </a>
         </div>
     </nav>
@@ -30,14 +30,11 @@
         <div class="container">
             <h1 class="display-4 fw-bold">Welcome to <span class="text-primary">AnalytIQ</span></h1>
             <p class="lead text-muted mb-5">Upload your dataset and gain insights instantly.</p>
-            <a href="#main-content" class="btn btn-primary btn-lg">
-                Get Started <i class="fas fa-arrow-down ms-2"></i>
-            </a>
         </div>
     </section>
 
     <!-- Main Content -->
-    <div class="container mt-5" id="main-content">
+    <div class="container mt-5">
         <!-- Display Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -50,7 +47,7 @@
           {% endif %}
         {% endwith %}
 
-        <div class="card shadow-sm p-4 mb-5">
+        <div class="card shadow-sm p-4">
             <form method="post" enctype="multipart/form-data">
                 <div class="mb-4">
                     <label for="dataset" class="form-label fw-semibold">Choose CSV File:</label>
@@ -102,7 +99,7 @@
                 </div>
 
                 <div class="text-center mt-5">
-                    <button type="submit" class="btn btn-primary btn-lg shadow">
+                    <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-chart-line me-2"></i>Analyze Data
                     </button>
                 </div>
