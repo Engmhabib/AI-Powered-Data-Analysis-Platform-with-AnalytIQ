@@ -91,7 +91,7 @@ Welcome to the **AI-Powered Data Analysis Platform with AnalytIQ** repository! T
 
 ### Prerequisites
 
-- **Python 3.7+**
+- **Python 3.10+**
 - **pip** 
 - **Git**
 - **OpenAI API Key:** Required for AnalytIQ functionality.
