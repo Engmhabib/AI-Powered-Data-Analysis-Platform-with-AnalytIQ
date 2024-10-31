@@ -1,6 +1,7 @@
 
 
 # 🚀 AI-Powered Data Analysis Platform with AnalytIQ 🚀
+Web app link : **https://aitechsolution.design/**
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
