@@ -222,12 +222,10 @@ openai==0.28.0
 │   └── analysis.html
 ├── static
 │   ├── css
-│       └── styles.css
-│   
-│      
+│       └── styles.css    
 ├── requirements.txt
 ├── README.md
-└── .env  # Should not be checked into version controlv  # Should not be checked into version control
+└── .env 
 ```
 
 static: Contains static assets such as CSS files and images.
