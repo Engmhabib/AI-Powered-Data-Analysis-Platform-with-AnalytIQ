@@ -16,37 +16,26 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AnalytIQ Logo" height="50" class="me-2">
-                <span class="fw-bold">Analyt<span class="text-primary">IQ</span></span>
+                <span class="fw-bold text-dark">Analyt<span class="text-primary">IQ</span></span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- Optional: Add more navigation items -->
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <!-- Add navigation items here -->
-                </ul>
-            </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section text-center text-white">
+    <section class="hero-section text-center py-5">
         <div class="container">
-            <h1 class="display-4 fw-bold">Welcome to <span class="text-highlight">AnalytIQ</span></h1>
-            <p class="lead mb-5">Upload your dataset and gain insights instantly.</p>
-            <a href="#main-content" class="btn btn-primary btn-lg">
-                Get Started <i class="fas fa-arrow-down ms-2"></i>
-            </a>
+            <h1 class="display-4 fw-bold">Welcome to <span class="text-primary">AnalytIQ</span></h1>
+            <p class="lead text-muted mb-5">Upload your dataset and gain insights instantly.</p>
+            <a href="#upload-section" class="btn btn-primary btn-lg">Get Started</a>
         </div>
     </section>
 
     <!-- Main Content -->
-    <div class="container mt-5" id="main-content">
+    <div class="container mt-5" id="upload-section">
         <!-- Display Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -135,8 +124,8 @@
         <div class="content"></div>
         <footer>
             <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="voice-input-button" aria-label="Use voice input">&#127908;</button>
-            <button id="get-answer">Send</button>
+            <button id="voice-input-button" aria-label="Use voice input"><i class="fas fa-microphone"></i></button>
+            <button id="get-answer"><i class="fas fa-paper-plane"></i></button>
         </footer>
     </div>
 
@@ -178,7 +167,6 @@
         });
 
         document.getElementById('get-answer').addEventListener('click', function() {
-            // Existing chatbot functionality
             var userInput = document.getElementById('user-input').value;
             var contentDiv = document.querySelector('#chatbox .content');
 
@@ -229,7 +217,7 @@
                 var copyButton = document.createElement('button');
                 copyButton.classList.add('copy-button');
                 copyButton.setAttribute('aria-label', 'Copy to clipboard');
-                copyButton.innerHTML = '&#128203;'; // Clipboard emoji
+                copyButton.innerHTML = '<i class="fas fa-copy"></i>';
 
                 // Add click event to the copy button
                 copyButton.addEventListener('click', function() {
@@ -240,7 +228,7 @@
                 var voiceButton = document.createElement('button');
                 voiceButton.classList.add('voice-button');
                 voiceButton.setAttribute('aria-label', 'Listen to the answer');
-                voiceButton.innerHTML = '&#128266;'; // Speaker with sound waves emoji
+                voiceButton.innerHTML = '<i class="fas fa-volume-up"></i>';
 
                 // Add click event to the voice button
                 voiceButton.addEventListener('click', function() {
